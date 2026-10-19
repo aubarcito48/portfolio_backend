@@ -1,8 +1,11 @@
 from datetime import date
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection, transaction
+from django.urls import reverse
 from django.test import TestCase, TransactionTestCase, override_settings
 
 from .models import (
@@ -884,3 +887,474 @@ class EnlaceApiTests(TestCase):
         response = self.client.post('/api/v1/enlaces/')
 
         self.assertEqual(response.status_code, 405)
+
+
+class DjangoAdminPermissionTests(TestCase):
+    managed_models = (
+        Perfil,
+        Tecnologia,
+        Experiencia,
+        Formacion,
+        Proyecto,
+        Enlace,
+    )
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.non_staff = user_model.objects.create_user(
+            username='portfolio-non-staff',
+        )
+        self.staff_without_permissions = user_model.objects.create_user(
+            username='portfolio-no-permissions',
+            is_staff=True,
+        )
+        self.editor = user_model.objects.create_user(
+            username='portfolio-editor',
+            is_staff=True,
+        )
+        self.editor_group = Group.objects.get(name='Editores de contenido')
+        self.editor.groups.add(self.editor_group)
+
+    def admin_model_url(self, model, action):
+        return reverse(f'admin:portfolio_{model._meta.model_name}_{action}')
+
+    def test_anonymous_admin_access_redirects_to_login(self):
+        response = self.client.get('/admin/')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/admin/login/?next=/admin/')
+
+    def test_non_staff_user_cannot_access_admin(self):
+        self.client.force_login(self.non_staff)
+
+        response = self.client.get('/admin/')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/admin/login/', response.url)
+
+    def test_staff_without_model_permissions_cannot_open_content_changelists(self):
+        self.client.force_login(self.staff_without_permissions)
+
+        index_response = self.client.get('/admin/')
+        self.assertEqual(index_response.status_code, 302)
+        self.assertIn('/admin/login/', index_response.url)
+
+        for model in self.managed_models:
+            with self.subTest(model=model.__name__):
+                response = self.client.get(
+                    self.admin_model_url(model, 'changelist')
+                )
+                self.assertEqual(response.status_code, 302)
+                self.assertIn('/admin/login/', response.url)
+
+    def test_user_with_model_scoped_permissions_cannot_access_other_models(self):
+        scoped_user = get_user_model().objects.create_user(
+            username='portfolio-scoped-editor',
+            is_staff=True,
+        )
+        scoped_permissions = self.editor_group.permissions.filter(
+            codename__in=('view_enlace', 'change_enlace'),
+        )
+        scoped_user.user_permissions.add(*scoped_permissions)
+        self.client.force_login(scoped_user)
+
+        allowed_response = self.client.get(
+            self.admin_model_url(Enlace, 'changelist')
+        )
+        denied_response = self.client.get(
+            self.admin_model_url(Proyecto, 'changelist')
+        )
+        denied_add_response = self.client.get(
+            self.admin_model_url(Enlace, 'add')
+        )
+
+        self.assertEqual(allowed_response.status_code, 200)
+        self.assertEqual(denied_response.status_code, 403)
+        self.assertEqual(denied_add_response.status_code, 403)
+
+    def test_editor_group_has_explicit_view_add_change_and_no_delete_permissions(self):
+        expected_permissions = {
+            f'{action}_{model._meta.model_name}'
+            for model in (*self.managed_models, EnlaceProyecto)
+            for action in ('view', 'add', 'change')
+        }
+        actual_permissions = set(
+            self.editor_group.permissions.filter(
+                content_type__app_label='portfolio',
+            ).values_list('codename', flat=True)
+        )
+
+        self.assertSetEqual(actual_permissions, expected_permissions)
+
+    def test_editor_can_view_and_open_add_pages_for_managed_models(self):
+        self.client.force_login(self.editor)
+
+        for model in self.managed_models:
+            with self.subTest(model=model.__name__):
+                changelist_response = self.client.get(
+                    self.admin_model_url(model, 'changelist')
+                )
+                self.assertEqual(changelist_response.status_code, 200)
+
+                add_response = self.client.get(
+                    self.admin_model_url(model, 'add')
+                )
+                if model is Perfil and Perfil.objects.exists():
+                    self.assertEqual(add_response.status_code, 403)
+                else:
+                    self.assertEqual(add_response.status_code, 200)
+
+    def test_editor_can_unpublish_a_link_and_public_api_hides_it(self):
+        link = Enlace.objects.get(type='github')
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse(
+                'admin:portfolio_enlace_change',
+                args=(link.pk,),
+            ),
+            {
+                'label': link.label,
+                'type': link.type,
+                'url': link.url,
+                'order': link.order,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        link.refresh_from_db()
+        self.assertFalse(link.is_published)
+        public_links = self.client.get('/api/v1/enlaces/').json()
+        self.assertNotIn(link.url, [item['url'] for item in public_links])
+
+    def test_editor_admin_changes_to_all_content_types_are_saved_and_public(self):
+        self.client.force_login(self.editor)
+
+        profile = Perfil.objects.get()
+        profile_response = self.client.post(
+            reverse('admin:portfolio_perfil_change', args=(profile.pk,)),
+            {
+                'name': 'Perfil actualizado desde Admin',
+                'professional_title': profile.professional_title,
+                'biography': profile.biography,
+                'location': profile.location,
+                'image_url': profile.image_url,
+                'is_published': 'on',
+            },
+        )
+        self.assertEqual(profile_response.status_code, 302)
+        self.assertEqual(
+            self.client.get('/api/v1/perfil/').json()['name'],
+            'Perfil actualizado desde Admin',
+        )
+
+        technology_response = self.client.post(
+            self.admin_model_url(Tecnologia, 'add'),
+            {
+                'name': 'Admin Published Technology',
+                'category': 'Admin',
+                'url': 'https://docs.example.com/admin-technology',
+                'order': '30',
+                'is_published': 'on',
+            },
+        )
+        self.assertEqual(technology_response.status_code, 302)
+        technologies = self.client.get('/api/v1/tecnologias/').json()
+        self.assertIn(
+            'Admin Published Technology',
+            [
+                item['name']
+                for group in technologies
+                for item in group['technologies']
+            ],
+        )
+
+        experience_response = self.client.post(
+            self.admin_model_url(Experiencia, 'add'),
+            {
+                'title': 'Experiencia desde Admin',
+                'organization': 'Organización de prueba',
+                'description': 'Descripción administrada.',
+                'start_date': '2025-01-01',
+                'end_date': '',
+                'is_current': 'on',
+                'order': '30',
+                'is_published': 'on',
+            },
+        )
+        self.assertEqual(experience_response.status_code, 302)
+        experiences = self.client.get('/api/v1/experiencias/').json()
+        self.assertIn(
+            'Experiencia desde Admin',
+            [item['title'] for item in experiences],
+        )
+
+        education_response = self.client.post(
+            self.admin_model_url(Formacion, 'add'),
+            {
+                'name': 'Formación desde Admin',
+                'institution': 'Institución de prueba',
+                'type': Formacion.Type.STUDY,
+                'status': Formacion.Status.IN_PROGRESS,
+                'start_date': '2025-01-01',
+                'end_date': '',
+                'url': '',
+                'order': '30',
+                'is_published': 'on',
+            },
+        )
+        self.assertEqual(education_response.status_code, 302)
+        education = self.client.get('/api/v1/formacion/').json()
+        self.assertIn(
+            'Formación desde Admin',
+            [item['name'] for item in education],
+        )
+
+        project_response = self.client.post(
+            self.admin_model_url(Proyecto, 'add'),
+            {
+                'title': 'Proyecto desde Admin',
+                'slug': 'proyecto-desde-admin',
+                'summary': 'Resumen administrado.',
+                'description': 'Descripción administrada.',
+                'project_type': 'Proyecto personal',
+                'image_url': '',
+                'image_alt': '',
+                'demo_url': '',
+                'demo_label': 'Ver demo',
+                'repository_url': '',
+                'repository_label': 'Repositorio',
+                'technologies': [],
+                'order': '30',
+                'is_published': 'on',
+                'additional_links-TOTAL_FORMS': '1',
+                'additional_links-INITIAL_FORMS': '0',
+                'additional_links-MIN_NUM_FORMS': '0',
+                'additional_links-MAX_NUM_FORMS': '1000',
+                'additional_links-0-label': 'Frontend del proyecto',
+                'additional_links-0-url': 'https://example.com/project-frontend',
+                'additional_links-0-order': '0',
+            },
+        )
+        self.assertEqual(project_response.status_code, 302)
+        self.assertEqual(
+            self.client.get(
+                '/api/v1/proyectos/proyecto-desde-admin/'
+            ).json()['links'],
+            [
+                {
+                    'label': 'Frontend del proyecto',
+                    'url': 'https://example.com/project-frontend',
+                }
+            ],
+        )
+
+        link_response = self.client.post(
+            self.admin_model_url(Enlace, 'add'),
+            {
+                'label': 'Enlace desde Admin',
+                'type': 'portfolio',
+                'url': 'https://example.com/admin-link',
+                'order': '30',
+                'is_published': 'on',
+            },
+        )
+        self.assertEqual(link_response.status_code, 302)
+        links = self.client.get('/api/v1/enlaces/').json()
+        self.assertIn(
+            'https://example.com/admin-link',
+            [item['url'] for item in links],
+        )
+
+        profile = Perfil.objects.get()
+        self.assertEqual(
+            self.client.post(
+                reverse('admin:portfolio_perfil_change', args=(profile.pk,)),
+                {
+                    'name': profile.name,
+                    'professional_title': profile.professional_title,
+                    'biography': profile.biography,
+                    'location': profile.location,
+                    'image_url': profile.image_url,
+                },
+            ).status_code,
+            302,
+        )
+        self.assertEqual(self.client.get('/api/v1/perfil/').status_code, 404)
+
+        technology = Tecnologia.objects.get(name='Admin Published Technology')
+        self.assertEqual(
+            self.client.post(
+                reverse(
+                    'admin:portfolio_tecnologia_change',
+                    args=(technology.pk,),
+                ),
+                {
+                    'name': technology.name,
+                    'category': technology.category,
+                    'url': technology.url,
+                    'order': technology.order,
+                },
+            ).status_code,
+            302,
+        )
+        technologies = self.client.get('/api/v1/tecnologias/').json()
+        self.assertNotIn(
+            technology.name,
+            [
+                item['name']
+                for group in technologies
+                for item in group['technologies']
+            ],
+        )
+
+        experience = Experiencia.objects.get(title='Experiencia desde Admin')
+        self.assertEqual(
+            self.client.post(
+                reverse(
+                    'admin:portfolio_experiencia_change',
+                    args=(experience.pk,),
+                ),
+                {
+                    'title': experience.title,
+                    'organization': experience.organization,
+                    'description': experience.description,
+                    'start_date': experience.start_date.isoformat(),
+                    'end_date': '',
+                    'is_current': 'on',
+                    'order': experience.order,
+                },
+            ).status_code,
+            302,
+        )
+        experiences = self.client.get('/api/v1/experiencias/').json()
+        self.assertNotIn(
+            experience.title,
+            [item['title'] for item in experiences],
+        )
+
+        education_record = Formacion.objects.get(name='Formación desde Admin')
+        self.assertEqual(
+            self.client.post(
+                reverse(
+                    'admin:portfolio_formacion_change',
+                    args=(education_record.pk,),
+                ),
+                {
+                    'name': education_record.name,
+                    'institution': education_record.institution,
+                    'type': education_record.type,
+                    'status': education_record.status,
+                    'start_date': education_record.start_date.isoformat(),
+                    'end_date': '',
+                    'url': '',
+                    'order': education_record.order,
+                },
+            ).status_code,
+            302,
+        )
+        education = self.client.get('/api/v1/formacion/').json()
+        self.assertNotIn(
+            education_record.name,
+            [item['name'] for item in education],
+        )
+
+        project = Proyecto.objects.get(slug='proyecto-desde-admin')
+        self.assertEqual(
+            self.client.post(
+                reverse(
+                    'admin:portfolio_proyecto_change',
+                    args=(project.pk,),
+                ),
+                {
+                    'title': project.title,
+                    'slug': project.slug,
+                    'summary': project.summary,
+                    'description': project.description,
+                    'project_type': project.project_type,
+                    'image_url': '',
+                    'image_alt': '',
+                    'demo_url': '',
+                    'demo_label': project.demo_label,
+                    'repository_url': '',
+                    'repository_label': project.repository_label,
+                    'technologies': [],
+                    'order': project.order,
+                    'additional_links-TOTAL_FORMS': '0',
+                    'additional_links-INITIAL_FORMS': '0',
+                    'additional_links-MIN_NUM_FORMS': '0',
+                    'additional_links-MAX_NUM_FORMS': '1000',
+                },
+            ).status_code,
+            302,
+        )
+        self.assertEqual(
+            self.client.get(
+                '/api/v1/proyectos/proyecto-desde-admin/'
+            ).status_code,
+            404,
+        )
+
+        link = Enlace.objects.get(type='portfolio')
+        self.assertEqual(
+            self.client.post(
+                reverse('admin:portfolio_enlace_change', args=(link.pk,)),
+                {
+                    'label': link.label,
+                    'type': link.type,
+                    'url': link.url,
+                    'order': link.order,
+                },
+            ).status_code,
+            302,
+        )
+        links = self.client.get('/api/v1/enlaces/').json()
+        self.assertNotIn(link.url, [item['url'] for item in links])
+
+    def test_editor_cannot_delete_records_without_explicit_delete_permission(self):
+        link = Enlace.objects.get(type='github')
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse(
+                'admin:portfolio_enlace_delete',
+                args=(link.pk,),
+            ),
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Enlace.objects.filter(pk=link.pk).exists())
+
+    def test_superuser_can_delete_when_authorized(self):
+        superuser = get_user_model().objects.create_superuser(
+            username='portfolio-superuser',
+            email='admin@example.com',
+        )
+        link = Enlace.objects.get(type='github')
+        self.client.force_login(superuser)
+
+        response = self.client.post(
+            reverse(
+                'admin:portfolio_enlace_delete',
+                args=(link.pk,),
+            ),
+            {'post': 'yes'},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Enlace.objects.filter(pk=link.pk).exists())
+
+    def test_editor_profile_admin_preserves_singleton_restriction(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.get(self.admin_model_url(Perfil, 'add'))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Perfil.objects.count(), 1)
+
+    def test_admin_registrations_cover_all_managed_models(self):
+        from .admin import portfolio_admin_site
+
+        for model in self.managed_models:
+            with self.subTest(model=model.__name__):
+                self.assertIn(model, portfolio_admin_site._registry)

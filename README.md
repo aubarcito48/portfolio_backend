@@ -117,6 +117,34 @@ un perfil publicado, responde HTTP 404:
 }
 ```
 
+## Administración del contenido
+
+La administración está disponible en `/admin/`. Las personas sin iniciar
+sesión deben autenticarse; el acceso requiere una cuenta activa con `is_staff`
+y al menos un permiso sobre contenido del portfolio, además de los permisos
+correspondientes a cada modelo. El índice del Admin y los modelos ajenos a sus
+permisos quedan denegados. Creá una cuenta administrativa
+local con:
+
+```powershell
+python manage.py createsuperuser
+```
+
+La migración crea el grupo **Editores de contenido**, con permisos explícitos
+de consulta, creación y edición para Perfil, Tecnología, Experiencia,
+Formación, Proyecto y Enlace, además de los permisos requeridos para administrar
+los enlaces complementarios de proyectos desde su inline. El grupo no recibe
+permisos de eliminación; asignalos individualmente solo cuando sean necesarios.
+Para dar acceso a un editor, creá una cuenta desde Django Admin y agregala al
+grupo. No se crean usuarios ni contraseñas por defecto. El perfil mantiene la
+restricción de un único registro; las tecnologías de los proyectos se
+seleccionan mediante un control de selección múltiple.
+
+Los listados permiten buscar y filtrar contenido, y editar en línea el orden y
+el estado de publicación cuando corresponde. Despublicar un elemento lo oculta
+de los endpoints públicos sin eliminarlo. Los cambios hechos desde Admin se
+guardan en PostgreSQL.
+
 ## API
 
 Los endpoints de consulta permiten únicamente `GET`; los demás métodos
