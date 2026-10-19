@@ -1,0 +1,75 @@
+{
+  "case": "BE-CP26",
+  "startedAtUtc": "2026-10-19T18:44:20.388284+00:00",
+  "artifacts": "backups\\recovery-20261019T184420Z-e3aefa",
+  "steps": [
+    {
+      "name": "current-revision",
+      "exitCode": 0,
+      "seconds": 0.012
+    },
+    {
+      "name": "rollback-revision",
+      "exitCode": 0,
+      "seconds": 0.014
+    },
+    {
+      "name": "same-models-and-migrations",
+      "exitCode": 0,
+      "seconds": 0.017
+    },
+    {
+      "name": "clean-models-and-migrations",
+      "exitCode": 0,
+      "seconds": 0.032
+    },
+    {
+      "name": "archive-previous-code",
+      "exitCode": 0,
+      "seconds": 0.057
+    },
+    {
+      "name": "pg_dump-version",
+      "exitCode": 0,
+      "seconds": 0.062
+    },
+    {
+      "name": "pg_restore-version",
+      "exitCode": 0,
+      "seconds": 0.036
+    },
+    {
+      "name": "init-cluster",
+      "exitCode": 0,
+      "seconds": 4.755
+    },
+    {
+      "name": "start-cluster",
+      "exitCode": 0,
+      "seconds": 41.683
+    },
+    {
+      "name": "stop-disposable-cluster",
+      "exitCode": 1,
+      "seconds": 0.01
+    }
+  ],
+  "result": "failed",
+  "sourceAndTarget": "two new databases in a disposable loopback-only cluster",
+  "productionContacted": false,
+  "credentialsParsedFromEnvFiles": false,
+  "gitCommit": "9c64b61268a31136b0e9054a0a77c1064c02e509",
+  "rollbackCommit": "42e68bb46b2d245dec9b21167dd692cd0ca729bb",
+  "versions": {
+    "pg_dump": "pg_dump (PostgreSQL) 18.3",
+    "pg_restore": "pg_restore (PostgreSQL) 18.3",
+    "python": "3.14.3",
+    "django": "6.1.2"
+  },
+  "failureType": "ConnectionTimeout",
+  "clusterStopped": false,
+  "envFilesUnchanged": true,
+  "finishedAtUtc": "2026-10-19T18:45:12.156969+00:00",
+  "externalCleanupConfirmed": true,
+  "cleanupNote": "First diagnostic cluster stopped externally after validating its workspace path; automatic shutdown subsequently found it stopped."
+}

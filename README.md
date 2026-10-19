@@ -90,6 +90,18 @@ No se leyó ni modificó el archivo `.env` para estas verificaciones.
 
 ## Instalación local (Windows / PowerShell)
 
+Copias y recuperación (TK19): [procedimiento](docs/BACKUP_RECOVERY.md) y
+[BE-CP26: ensayo aprobado](reports/BE-CP26.md). Para repetirlo sin tocar bases
+existentes ni cargar archivos `.env`, ejecutar desde esta raíz:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_recovery.py --pg-bin 'C:/Program Files/PostgreSQL/18/bin'
+```
+
+El ensayo genera datos sintéticos, restaura en otra base nueva y prueba una
+versión anterior compatible. Las copias privadas quedan ignoradas en `backups/`.
+Volver a un commit previo no revierte automáticamente datos ni migraciones.
+
 Para una transferencia PostgreSQL local → Supabase, consultar
 [`docs/SUPABASE_TRANSFER.md`](docs/SUPABASE_TRANSFER.md). El procedimiento usa
 configuraciones separadas, respaldo local y guardas contra contenido existente.

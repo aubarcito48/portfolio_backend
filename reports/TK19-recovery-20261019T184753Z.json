@@ -1,0 +1,37 @@
+{
+  "case": "BE-CP26",
+  "startedAtUtc": "2026-10-19T18:47:53.067357+00:00",
+  "artifacts": "backups\\recovery-20261019T184753Z-882394",
+  "steps": [
+    {
+      "name": "current-revision",
+      "exitCode": 0,
+      "seconds": 0.012
+    },
+    {
+      "name": "rollback-revision",
+      "exitCode": 0,
+      "seconds": 0.013
+    },
+    {
+      "name": "same-models-and-migrations",
+      "exitCode": 1,
+      "seconds": 0.016
+    }
+  ],
+  "result": "failed",
+  "sourceAndTarget": "two new databases in a disposable loopback-only cluster",
+  "productionContacted": false,
+  "credentialsParsedFromEnvFiles": false,
+  "privateStoragePermissionsApplied": true,
+  "workingTreeContainsRecoveryImplementation": true,
+  "sourceFileSha256": {
+    "validate_recovery.py": "9eec1600c91b31e1d93ea2ee5b27e02bc50741ff4b662064bd3e903e73d2ea61",
+    "recovery_probe.py": "c6cad208307b4cab19d982cf417694844a2aab1cc129994cb9084a2ca661b55a"
+  },
+  "gitCommit": "9c64b61268a31136b0e9054a0a77c1064c02e509",
+  "rollbackCommit": "b9eeb98b14cbec6427a847a9434f9bdf03a48eef",
+  "failureType": "RuntimeError",
+  "envFilesUnchanged": true,
+  "finishedAtUtc": "2026-10-19T18:47:53.116088+00:00"
+}
