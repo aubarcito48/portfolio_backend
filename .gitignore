@@ -26,3 +26,6 @@ htmlcov/
 
 # Bulky execution evidence is retained locally; version the JSON/Markdown summaries.
 reports/*/
+
+# Private database transfer artifacts (may include unpublished portfolio data).
+backups/

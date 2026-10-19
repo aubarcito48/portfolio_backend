@@ -1,0 +1,135 @@
+{
+  "startedAt": "2026-10-19T16:23:02.382584+00:00",
+  "dotenvDisabled": true,
+  "database": "isolated newly initialized local PostgreSQL cluster; synthetic configuration",
+  "steps": [
+    {
+      "name": "start-isolated-postgres",
+      "exitCode": 0,
+      "stdout": "esperando que el servidor se inicie.... listo\nservidor iniciado\n",
+      "stderr": ""
+    },
+    {
+      "name": "dependency-consistency",
+      "exitCode": 0,
+      "stdout": "No broken requirements found.\n",
+      "stderr": ""
+    },
+    {
+      "name": "django-check",
+      "exitCode": 0,
+      "stdout": "System check identified no issues (0 silenced).\n",
+      "stderr": ""
+    },
+    {
+      "name": "collectstatic",
+      "exitCode": 0,
+      "stdout": "\n0 static files copied to 'C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\staticfiles', 130 unmodified.\n",
+      "stderr": ""
+    },
+    {
+      "name": "migration-drift",
+      "exitCode": 0,
+      "stdout": "No changes detected\n",
+      "stderr": ""
+    },
+    {
+      "name": "full-postgresql-suite",
+      "exitCode": 0,
+      "stdout": "Found 111 test(s).\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default'...\n\n...{\"timestamp\": \"2026-10-19T16:23:08.208258+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:23:08.447535+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n...{\"timestamp\": \"2026-10-19T16:23:08.575036+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:23:08.575830+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:23:08.576591+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..............{\"timestamp\": \"2026-10-19T16:23:08.913617+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:23:08.914765+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:23:08.915621+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:23:09.014973+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:23:09.057491+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:23:09.119733+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:23:09.281596+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n..{\"timestamp\": \"2026-10-19T16:23:09.303721+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n....{\"timestamp\": \"2026-10-19T16:23:09.416052+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:23:09.419186+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:23:09.447066+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n..........................{\"timestamp\": \"2026-10-19T16:23:09.908594+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T16:23:09.919596+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T16:23:09.968939+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T16:23:09.980383+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n........{\"timestamp\": \"2026-10-19T16:23:10.107846+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.108202+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.108566+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.108899+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.109235+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.109548+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.109850+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.110149+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.110521+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.110826+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.111122+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.111420+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.111735+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.112037+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.112333+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.112627+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.112936+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.113225+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.113519+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.113806+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.114113+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.114417+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.114710+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.114997+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.115313+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.115611+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.115903+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:23:10.116187+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n.{\"timestamp\": \"2026-10-19T16:23:10.127945+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 400}\n...{\"timestamp\": \"2026-10-19T16:23:10.183095+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n...........................{\"timestamp\": \"2026-10-19T16:23:10.949646+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:23:11.399188+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T16:23:12.075659+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.\n----------------------------------------------------------------------\nRan 111 tests in 5.152s\n\nOK\nDestroying test database for alias 'default'...\n\n",
+      "testCount": 111
+    },
+    {
+      "name": "production-check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "System check identified some issues:\n\nWARNINGS:\n?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.\n?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.\n\nSystem check identified 2 issues (1 silenced).\n"
+    },
+    {
+      "name": "production-static-admin-readiness-smoke",
+      "exitCode": 0,
+      "stdout": "PASS: production WhiteNoise CSS, HTTPS forwarding, Admin login and real PostgreSQL readiness\n",
+      "stderr": ""
+    },
+    {
+      "name": "gunicorn-native-platform-check",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\__main__.py\", line 5, in <module>\n    from gunicorn.app.wsgiapp import run\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\app\\wsgiapp.py\", line 8, in <module>\n    from gunicorn.app.base import Application\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\app\\base.py\", line 10, in <module>\n    from gunicorn import util\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\util.py\", line 7, in <module>\n    import fcntl\nModuleNotFoundError: No module named 'fcntl'\n"
+    },
+    {
+      "name": "synthetic-source-migrate",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-source-seed",
+      "exitCode": 0,
+      "stdout": "Carga inicial completada; se procesaron: 1 perfil, 24 tecnolog\u00edas, 2 proyectos y 2 enlaces profesionales.\nNo se cargaron experiencias ni formaciones: faltan datos verificables aprobados (fechas y detalles).\nLos datos de regresi\u00f3n se cargaron en la base E2E 'portfolio_e2e_transfer_3113623d'.\n",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-source-prepare",
+      "exitCode": 0,
+      "stdout": "Synthetic source profile PK differs from migration seed; synthetic user added for exclusion test.\n",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-source-backup",
+      "exitCode": 0,
+      "stdout": "LOCAL full backup created; never restore it into Supabase automatically.\n",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-backup-readable",
+      "exitCode": 0,
+      "stdout": ";\n; Archive created at 2026-10-19 13:23:18\n;     dbname: portfolio_e2e_transfer_3113623d\n;     TOC Entries: 132\n;     Compression: gzip\n;     Dump Version: 1.16-0\n;     Format: CUSTOM\n;     Integer: 4 bytes\n;     Offset: 8 bytes\n;     Dumped from database version: 18.3\n;     Dumped by pg_dump version: 18.3\n;\n;\n; Selected TOC Entries:\n;\n226; 1259 22147 TABLE public auth_group deploy_check\n225; 1259 22146 SEQUENCE public auth_group_id_seq deploy_check\n228; 1259 22157 TABLE public auth_group_permissions deploy_check\n227; 1259 22156 SEQUENCE public auth_group_permissions_id_seq deploy_check\n224; 1259 22137 TABLE public auth_permission deploy_check\n223; 1259 22136 SEQUENCE public auth_permission_id_seq deploy_check\n230; 1259 22166 TABLE public auth_user deploy_check\n232; 1259 22185 TABLE public auth_user_groups deploy_check\n231; 1259 22184 SEQUENCE public auth_user_groups_id_seq deploy_check\n229; 1259 22165 SEQUENCE public auth_user_id_seq deploy_check\n234; 1259 22194 TABLE public auth_user_user_permissions deploy_check\n233; 1259 22193 SEQUENCE public auth_user_user_permissions_id_seq deploy_check\n236; 1259 22255 TABLE public django_admin_log deploy_check\n235; 1259 22254 SEQUENCE public django_admin_log_id_seq deploy_check\n222; 1259 22125 TABLE public django_content_type deploy_check\n221; 1259 22124 SEQUENCE public django_content_type_id_seq deploy_check\n220; 1259 22113 TABLE public django_migrations deploy_check\n219; 1259 22112 SEQUENCE public django_migrations_id_seq deploy_check\n253; 1259 22456 TABLE public django_session deploy_check\n252; 1259 22442 TABLE public portfolio_enlace deploy_check\n251; 1259 22441 SEQUENCE public portfolio_enlace_id_seq deploy_check\n250; 1259 22407 TABLE public portfolio_enlaceproyecto deploy_check\n249; 1259 22406 SEQUENCE public portfolio_enlaceproyecto_id_seq deploy_check\n242; 1259 22333 TABLE public portfolio_experiencia deploy_check\n241; 1259 22332 SEQUENCE public portfolio_experiencia_id_seq deploy_check\n244; 1259 22352 TABLE public portfolio_formacion deploy_check\n243; 1259 22351 SEQUENCE public portfolio_formacion_id_seq deploy_check\n238; 1259 22296 TABLE public portfolio_perfil deploy_check\n237; 1259 22295 SEQUENCE public portfolio_perfil_id_seq deploy_check\n246; 1259 22373 TABLE public portfolio_proyecto deploy_check\n245; 1259 22372 SEQUENCE public portfolio_proyecto_id_seq deploy_check\n248; 1259 22398 TABLE public portfolio_proyecto_technologies deploy_check\n247; 1259 22397 SEQUENCE public portfolio_proyecto_technologies_id_seq deploy_check\n240; 1259 22317 TABLE public portfolio_tecnologia deploy_check\n239; 1259 22316 SEQUENCE public portfolio_tecnologia_id_seq deploy_check\n5093; 0 22147 TABLE DATA public auth_group deploy_check\n5095; 0 22157 TABLE DATA public auth_group_permissions deploy_check\n5091; 0 22137 TABLE DATA public auth_permission deploy_check\n5097; 0 22166 TABLE DATA public auth_user deploy_check\n5099; 0 22185 TABLE DATA public auth_user_groups deploy_check\n5101; 0 22194 TABLE DATA public auth_user_user_permissions deploy_check\n5103; 0 22255 TABLE DATA public django_admin_log deploy_check\n5089; 0 22125 TABLE DATA public django_content_type deploy_check\n5087; 0 22113 TABLE DATA public django_migrations deploy_check\n5120; 0 22456 TABLE DATA public django_session deploy_check\n5119; 0 22442 TABLE DATA public portfolio_enlace deploy_check\n5117; 0 22407 TABLE DATA public portfolio_enlaceproyecto deploy_check\n5109; 0 22333 TABLE DATA public portfolio_experiencia deploy_check\n5111; 0 22352 TABLE DATA public portfolio_formacion deploy_check\n5105; 0 22296 TABLE DATA public portfolio_perfil deploy_check\n5113; 0 22373 TABLE DATA public portfolio_proyecto deploy_check\n5115; 0 22398 TABLE DATA public portfolio_proyecto_technologies deploy_check\n5107; 0 22317 TABLE DATA public portfolio_tecnologia deploy_check\n5127; 0 0 SEQUENCE SET public auth_group_id_seq deploy_check\n5128; 0 0 SEQUENCE SET public auth_group_permissions_id_seq deploy_check\n5129; 0 0 SEQUENCE SET public auth_permission_id_seq deploy_check\n5130; 0 0 SEQUENCE SET public auth_user_groups_id_seq deploy_check\n5131; 0 0 SEQUENCE SET public auth_user_id_seq deploy_check\n5132; 0 0 SEQUENCE SET public auth_user_user_permissions_id_seq deploy_check\n5133; 0 0 SEQUENCE SET public django_admin_log_id_seq deploy_check\n5134; 0 0 SEQUENCE SET public django_content_type_id_seq deploy_check\n5135; 0 0 SEQUENCE SET public django_migrations_id_seq deploy_check\n5136; 0 0 SEQUENCE SET public portfolio_enlace_id_seq deploy_check\n5137; 0 0 SEQUENCE SET public portfolio_enlaceproyecto_id_seq deploy_check\n5138; 0 0 SEQUENCE SET public portfolio_experiencia_id_seq deploy_check\n5139; 0 0 SEQUENCE SET public portfolio_formacion_id_seq deploy_check\n5140; 0 0 SEQUENCE SET public portfolio_perfil_id_seq deploy_check\n5141; 0 0 SEQUENCE SET public portfolio_proyecto_id_seq deploy_check\n5142; 0 0 SEQUENCE SET public portfolio_proyecto_technologies_id_seq deploy_check\n5143; 0 0 SEQUENCE SET public portfolio_tecnologia_id_seq deploy_check\n4866; 2606 22291 CONSTRAINT public auth_group auth_group_name_key deploy_check\n4871; 2606 22212 CONSTRAINT public auth_group_permissions auth_group_permissions_group_id_permission_id_0cd325b0_uniq deploy_check\n4874; 2606 22164 CONSTRAINT public auth_group_permissions auth_group_permissions_pkey deploy_check\n4868; 2606 22153 CONSTRAINT public auth_group auth_group_pkey deploy_check\n4861; 2606 22203 CONSTRAINT public auth_permission auth_permission_content_type_id_codename_01ab375a_uniq deploy_check\n4863; 2606 22145 CONSTRAINT public auth_permission auth_permission_pkey deploy_check\n4882; 2606 22192 CONSTRAINT public auth_user_groups auth_user_groups_pkey deploy_check\n4885; 2606 22227 CONSTRAINT public auth_user_groups auth_user_groups_user_id_group_id_94350c0c_uniq deploy_check\n4876; 2606 22181 CONSTRAINT public auth_user auth_user_pkey deploy_check\n4888; 2606 22201 CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_pkey deploy_check\n4891; 2606 22241 CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_user_id_permission_id_14a6b632_uniq deploy_check\n4879; 2606 22284 CONSTRAINT public auth_user auth_user_username_key deploy_check\n4894; 2606 22268 CONSTRAINT public django_admin_log django_admin_log_pkey deploy_check\n4856; 2606 22135 CONSTRAINT public django_content_type django_content_type_app_label_model_76bd3d3b_uniq deploy_check\n4858; 2606 22133 CONSTRAINT public django_content_type django_content_type_pkey deploy_check\n4854; 2606 22123 CONSTRAINT public django_migrations django_migrations_pkey deploy_check\n4925; 2606 22465 CONSTRAINT public django_session django_session_pkey deploy_check\n4922; 2606 22455 CONSTRAINT public portfolio_enlace portfolio_enlace_pkey deploy_check\n4919; 2606 22419 CONSTRAINT public portfolio_enlaceproyecto portfolio_enlaceproyecto_pkey deploy_check\n4904; 2606 22350 CONSTRAINT public portfolio_experiencia portfolio_experiencia_pkey deploy_check\n4906; 2606 22371 CONSTRAINT public portfolio_formacion portfolio_formacion_pkey deploy_check\n4897; 2606 22313 CONSTRAINT public portfolio_perfil portfolio_perfil_pkey deploy_check\n4899; 2606 22315 CONSTRAINT public portfolio_perfil portfolio_perfil_singleton_key_key deploy_check\n4908; 2606 22394 CONSTRAINT public portfolio_proyecto portfolio_proyecto_pkey deploy_check\n4911; 2606 22396 CONSTRAINT public portfolio_proyecto portfolio_proyecto_slug_key deploy_check\n4913; 2606 22422 CONSTRAINT public portfolio_proyecto_technologies portfolio_proyecto_techn_proyecto_id_tecnologia_i_cd040e2f_uniq deploy_check\n4915; 2606 22405 CONSTRAINT public portfolio_proyecto_technologies portfolio_proyecto_technologies_pkey deploy_check\n4902; 2606 22330 CONSTRAINT public portfolio_tecnologia portfolio_tecnologia_pkey deploy_check\n4864; 1259 22292 INDEX public auth_group_name_a6ea08ec_like deploy_check\n4869; 1259 22223 INDEX public auth_group_permissions_group_id_b120cbf9 deploy_check\n4872; 1259 22224 INDEX public auth_group_permissions_permission_id_84c5c92e deploy_check\n4859; 1259 22209 INDEX public auth_permission_content_type_id_2f476e4b deploy_check\n4880; 1259 22239 INDEX public auth_user_groups_group_id_97559544 deploy_check\n4883; 1259 22238 INDEX public auth_user_groups_user_id_6a12ed8b deploy_check\n4886; 1259 22253 INDEX public auth_user_user_permissions_permission_id_1fbb5f2c deploy_check\n4889; 1259 22252 INDEX public auth_user_user_permissions_user_id_a95ead1b deploy_check\n4877; 1259 22285 INDEX public auth_user_username_6821ab7c_like deploy_check\n4892; 1259 22279 INDEX public django_admin_log_content_type_id_c4bce8eb deploy_check\n4895; 1259 22280 INDEX public django_admin_log_user_id_c564eba6 deploy_check\n4923; 1259 22467 INDEX public django_session_expire_date_a5c62663 deploy_check\n4926; 1259 22466 INDEX public django_session_session_key_c0390e0f_like deploy_check\n4920; 1259 22440 INDEX public portfolio_enlaceproyecto_project_id_e5d0b396 deploy_check\n4909; 1259 22420 INDEX public portfolio_proyecto_slug_d79d1281_like deploy_check\n4916; 1259 22433 INDEX public portfolio_proyecto_technologies_proyecto_id_d23b78ea deploy_check\n4917; 1259 22434 INDEX public portfolio_proyecto_technologies_tecnologia_id_78e82d0a deploy_check\n4900; 1259 22331 INDEX public portfolio_technology_unique_name_category deploy_check\n4928; 2606 22218 FK CONSTRAINT public auth_group_permissions auth_group_permissio_permission_id_84c5c92e_fk_auth_perm deploy_check\n4929; 2606 22213 FK CONSTRAINT public auth_group_permissions auth_group_permissions_group_id_b120cbf9_fk_auth_group_id deploy_check\n4927; 2606 22204 FK CONSTRAINT public auth_permission auth_permission_content_type_id_2f476e4b_fk_django_co deploy_check\n4930; 2606 22233 FK CONSTRAINT public auth_user_groups auth_user_groups_group_id_97559544_fk_auth_group_id deploy_check\n4931; 2606 22228 FK CONSTRAINT public auth_user_groups auth_user_groups_user_id_6a12ed8b_fk_auth_user_id deploy_check\n4932; 2606 22247 FK CONSTRAINT public auth_user_user_permissions auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm deploy_check\n4933; 2606 22242 FK CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id deploy_check\n4934; 2606 22269 FK CONSTRAINT public django_admin_log django_admin_log_content_type_id_c4bce8eb_fk_django_co deploy_check\n4935; 2606 22274 FK CONSTRAINT public django_admin_log django_admin_log_user_id_c564eba6_fk_auth_user_id deploy_check\n4938; 2606 22435 FK CONSTRAINT public portfolio_enlaceproyecto portfolio_enlaceproy_project_id_e5d0b396_fk_portfolio deploy_check\n4936; 2606 22423 FK CONSTRAINT public portfolio_proyecto_technologies portfolio_proyecto_t_proyecto_id_d23b78ea_fk_portfolio deploy_check\n4937; 2606 22428 FK CONSTRAINT public portfolio_proyecto_technologies portfolio_proyecto_t_tecnologia_id_78e82d0a_fk_portfolio deploy_check\n",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-source-export",
+      "exitCode": 0,
+      "stdout": "{\"counts\": {\"portfolio.perfil\": 1, \"portfolio.tecnologia\": 25, \"portfolio.experiencia\": 2, \"portfolio.formacion\": 2, \"portfolio.proyecto\": 3, \"portfolio.enlaceproyecto\": 1, \"portfolio.enlace\": 3}, \"projectTechnologyRelations\": 14, \"valuesAndRelationsSha256\": \"21444256998b0d1f31f3e876e0056053f2ef5ec2c5bae7553f2b78926e89e9bf\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "synthetic-transfer-rehearsal",
+      "exitCode": 0,
+      "stdout": "TARGET catalog inspected read-only; report saved privately.\n{\"match\": true, \"counts\": {\"portfolio.perfil\": 1, \"portfolio.tecnologia\": 25, \"portfolio.experiencia\": 2, \"portfolio.formacion\": 2, \"portfolio.proyecto\": 3, \"portfolio.enlaceproyecto\": 1, \"portfolio.enlace\": 3}, \"projectTechnologyRelations\": 14, \"valuesAndRelationsSha256\": \"21444256998b0d1f31f3e876e0056053f2ef5ec2c5bae7553f2b78926e89e9bf\"}\nTARGET new private schema migrated/imported and verified atomically.\n{\"match\": true, \"counts\": {\"portfolio.perfil\": 1, \"portfolio.tecnologia\": 25, \"portfolio.experiencia\": 2, \"portfolio.formacion\": 2, \"portfolio.proyecto\": 3, \"portfolio.enlaceproyecto\": 1, \"portfolio.enlace\": 3}, \"projectTechnologyRelations\": 14, \"valuesAndRelationsSha256\": \"21444256998b0d1f31f3e876e0056053f2ef5ec2c5bae7553f2b78926e89e9bf\"}\n{\"match\": true, \"counts\": {\"portfolio.perfil\": 1, \"portfolio.tecnologia\": 25, \"portfolio.experiencia\": 2, \"portfolio.formacion\": 2, \"portfolio.proyecto\": 3, \"portfolio.enlaceproyecto\": 1, \"portfolio.enlace\": 3}, \"projectTechnologyRelations\": 14, \"valuesAndRelationsSha256\": \"21444256998b0d1f31f3e876e0056053f2ef5ec2c5bae7553f2b78926e89e9bf\"}\nPASS: fresh private schema, exact values/relationships, no copied users, existing target refused without changes.\n",
+      "stderr": ""
+    },
+    {
+      "name": "stop-isolated-postgres",
+      "exitCode": 0,
+      "stdout": "esperando que el servidor se detenga..... listo\nservidor detenido\n",
+      "stderr": ""
+    }
+  ],
+  "supabaseOperationsExecuted": false,
+  "localRehearsalOnly": true,
+  "finishedAt": "2026-10-19T16:23:22.524044+00:00",
+  "result": "passed_local_rehearsal_only",
+  "localDatabaseExported": false,
+  "privateConfigsReadDuringValidation": false,
+  "pending": [
+    "Rotate the disclosed password and fill ignored .env.supabase locally.",
+    "Real Supabase catalog preflight, TLS, privileges and health have not been tested.",
+    "No real source backup/export or remote writes have been executed."
+  ],
+  "configurationChecks": [
+    {
+      "module": "config.settings_supabase",
+      "exitCode": 0,
+      "mockedConfiguration": true,
+      "networkForbidden": true
+    },
+    {
+      "module": "config.settings_local_transfer",
+      "exitCode": 0,
+      "mockedConfiguration": true,
+      "networkForbidden": true
+    }
+  ]
+}

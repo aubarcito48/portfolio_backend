@@ -83,6 +83,13 @@ No se leyó ni modificó el archivo `.env` para estas verificaciones.
 
 ## Instalación local (Windows / PowerShell)
 
+Para una transferencia PostgreSQL local → Supabase, consultar
+[`docs/SUPABASE_TRANSFER.md`](docs/SUPABASE_TRANSFER.md). El procedimiento usa
+configuraciones separadas, respaldo local y guardas contra contenido existente.
+Transferencia real completada y comparada el 19/10/2026; evidencia sin secretos en
+[`reports/supabase-transfer-execution.json`](reports/supabase-transfer-execution.json).
+El destino ya contiene la aplicación: no repetir `import-new`.
+
 Desde la carpeta `portfolio_backend`:
 
 ```powershell

@@ -1,0 +1,50 @@
+{
+  "executedAtUtc": "2026-10-19T16:40:28.106080+00:00",
+  "result": "passed",
+  "gitCommit": "42e68bb46b2d245dec9b21167dd692cd0ca729bb",
+  "workingTreeContainsTransferChanges": true,
+  "source": "PostgreSQL local loopback 18.3",
+  "target": "Supabase PostgreSQL 17.11",
+  "schema": "portfolio_django",
+  "sslActive": true,
+  "preflightFoundExistingApplicationObjects": false,
+  "backup": "backups\\transfer-20261019T163611Z\\local-full.dump",
+  "backupCatalogReadable": true,
+  "backupAndFixtureShareSnapshot": true,
+  "summary": {
+    "counts": {
+      "portfolio.perfil": 1,
+      "portfolio.tecnologia": 24,
+      "portfolio.experiencia": 0,
+      "portfolio.formacion": 0,
+      "portfolio.proyecto": 2,
+      "portfolio.enlaceproyecto": 1,
+      "portfolio.enlace": 2
+    },
+    "projectTechnologyRelations": 12,
+    "valuesAndRelationsSha256": "9847a1996e60e43e9c3972e8cd29bc36e920f29f3d4211c5ca0a70545257ae52"
+  },
+  "targetMatchesFixture": true,
+  "sourceBeforeAndAfterUnchanged": true,
+  "localEnvUnchanged": true,
+  "nonApplicationCatalogUnchanged": true,
+  "internalTablesRowCounts": {
+    "auth_user": 0,
+    "django_session": 0,
+    "django_admin_log": 0
+  },
+  "schemaUsageByApiRole": {
+    "anon": false,
+    "authenticated": false
+  },
+  "pendingMigrations": 0,
+  "healthHttpStatus": 200,
+  "productionAdminCreated": false,
+  "renderDeployed": false,
+  "notes": [
+    "Full local backup retained privately; imported only portfolio fixture.",
+    "Content seed functions skipped in memory for fresh installation; schema migrations retained.",
+    "Canonical comparison covers all serialized fields, primary keys and relationships.",
+    "sslmode=require encrypts traffic; verify-full with CA can additionally verify server identity."
+  ]
+}
