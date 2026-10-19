@@ -1,3 +1,37 @@
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
-# Create your views here.
+from .models import Perfil, Tecnologia
+
+
+@require_GET
+def perfil_publico(request):
+    try:
+        perfil = Perfil.objects.get(is_published=True)
+    except Perfil.DoesNotExist:
+        return JsonResponse(
+            {'detail': 'No hay un perfil publicado.'},
+            status=404,
+        )
+
+    return JsonResponse(perfil.to_public_dict())
+
+
+@require_GET
+def tecnologias_publicas(request):
+    groups = []
+    group_by_category = {}
+
+    for tecnologia in Tecnologia.objects.filter(is_published=True).order_by(
+        'order', 'id'
+    ):
+        group = group_by_category.get(tecnologia.category)
+        if group is None:
+            group = {'name': tecnologia.category, 'technologies': []}
+            group_by_category[tecnologia.category] = group
+            groups.append(group)
+        group['technologies'].append(
+            {'name': tecnologia.name, 'url': tecnologia.url}
+        )
+
+    return JsonResponse(groups, safe=False)

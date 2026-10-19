@@ -32,6 +32,10 @@ if not SECRET_KEY:
     raise ImproperlyConfigured(
         'Definí DJANGO_SECRET_KEY en el entorno o en el archivo .env.'
     )
+if SECRET_KEY.startswith('replace-with-'):
+    raise ImproperlyConfigured(
+        'DJANGO_SECRET_KEY todavía tiene el valor de ejemplo; generá una clave segura.'
+    )
 
 debug_value = os.getenv('DJANGO_DEBUG')
 if debug_value is None:
@@ -65,10 +69,20 @@ elif not allowed_hosts and ENVIRONMENT == 'test':
 
 ALLOWED_HOSTS = allowed_hosts
 
+CORS_ALLOWED_ORIGINS = [
+    origin.strip().rstrip('/')
+    for origin in os.getenv(
+        'DJANGO_CORS_ALLOWED_ORIGINS',
+        'http://localhost:4200' if ENVIRONMENT == 'development' else '',
+    ).split(',')
+    if origin.strip()
+]
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,6 +95,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -113,10 +128,42 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'TEST': {
+            'NAME': os.getenv(
+                'POSTGRES_TEST_DB',
+                f"test_{os.getenv('POSTGRES_DB', 'portfolio')}",
+            ),
+        },
     }
 }
+
+required_database_variables = (
+    'POSTGRES_DB',
+    'POSTGRES_USER',
+    'POSTGRES_PASSWORD',
+)
+missing_database_variables = [
+    variable
+    for variable in required_database_variables
+    if not os.getenv(variable)
+]
+if missing_database_variables:
+    raise ImproperlyConfigured(
+        'Definí las variables de conexión a PostgreSQL: '
+        + ', '.join(missing_database_variables)
+        + '.'
+    )
+
+if DATABASES['default']['TEST']['NAME'] == DATABASES['default']['NAME']:
+    raise ImproperlyConfigured(
+        'POSTGRES_TEST_DB debe ser distinta de POSTGRES_DB.'
+    )
 
 
 # Password validation
