@@ -177,6 +177,36 @@ organizaciones y fechas verificables. Por eso la migración crea el modelo, pero
 no inventa ni precarga experiencias; los datos validados se pueden cargar en
 Django Admin.
 
+### Formación y certificaciones
+
+`GET /api/v1/formacion/` devuelve HTTP 200 con una lista ordenada de registros
+publicados:
+
+```json
+[
+  {
+    "name": "Tecnicatura Superior en Desarrollo de Software",
+    "institution": "Instituto Superior Politécnico de Córdoba (ISPC)",
+    "type": "study",
+    "status": "in_progress",
+    "startDate": "2022-03-01",
+    "endDate": null,
+    "url": null
+  }
+]
+```
+
+`type` admite `study` o `certification`; `status` admite `in_progress` o
+`completed`. La formación en curso no tiene fecha de fin y la finalizada debe
+tenerla; la fecha de fin tampoco puede ser anterior a la de inicio. `url` es
+opcional y, cuando se informa, debe ser una URL válida. Si no hay registros
+publicados, el endpoint devuelve HTTP 200 con `[]`.
+
+El frontend confirma el nombre del estudio, ISPC y la certificación Junior Full
+Stack Developer, pero no proporciona fechas de inicio/finalización verificadas.
+Por eso la migración crea el modelo sin inventar ni precargar registros; los
+datos validados se pueden cargar desde Django Admin.
+
 ## Relación con el frontend
 
 El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
@@ -189,6 +219,6 @@ El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
 - `focus-chill.data.ts`: configuración de reproducción con `enabled`,
   `spotifyUrl`, `iframeTitle` y `autoplay`.
 
-La API de perfil y tecnologías mantiene los nombres públicos que consume el
-frontend. Las demás secciones se incorporarán en tareas siguientes; en TK04 y
-TK05 no se modificó el frontend.
+La API de perfil, tecnologías y formación usa nombres JSON camelCase para las
+fechas y conserva las estructuras públicas de las secciones del frontend. En
+TK04–TK07 no se modificó el frontend.

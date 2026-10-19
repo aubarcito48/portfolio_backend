@@ -12,4 +12,5 @@ urlpatterns = [
         views.experiencias_publicas,
         name='experiencias-publicas',
     ),
+    path('formacion/', views.formacion_publica, name='formacion-publica'),
 ]

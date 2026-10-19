@@ -126,3 +126,79 @@ class Experiencia(models.Model):
             'endDate': self.end_date.isoformat() if self.end_date else None,
             'isCurrent': self.is_current,
         }
+
+
+class Formacion(models.Model):
+    class Type(models.TextChoices):
+        STUDY = 'study', 'Estudio'
+        CERTIFICATION = 'certification', 'Certificación'
+
+    class Status(models.TextChoices):
+        IN_PROGRESS = 'in_progress', 'En curso'
+        COMPLETED = 'completed', 'Finalizada'
+
+    name = models.CharField(max_length=200)
+    institution = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, choices=Type.choices)
+    status = models.CharField(max_length=20, choices=Status.choices)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    url = models.URLField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('order', 'id')
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(end_date__isnull=True)
+                | Q(end_date__gte=models.F('start_date')),
+                name='portfolio_education_valid_date_range',
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(status='in_progress', end_date__isnull=True)
+                    | Q(status='completed', end_date__isnull=False)
+                ),
+                name='portfolio_education_status_matches_dates',
+            ),
+            models.CheckConstraint(
+                condition=Q(type__in=('study', 'certification')),
+                name='portfolio_education_valid_type',
+            ),
+        ]
+        verbose_name = 'formación'
+        verbose_name_plural = 'formación'
+
+    def clean(self):
+        super().clean()
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError(
+                {'end_date': 'La fecha de fin no puede ser anterior a la fecha de inicio.'}
+            )
+        if self.status == self.Status.IN_PROGRESS and self.end_date:
+            raise ValidationError(
+                {'end_date': 'Una formación en curso no puede tener fecha de fin.'}
+            )
+        if self.status == self.Status.COMPLETED and not self.end_date:
+            raise ValidationError(
+                {'end_date': 'Una formación finalizada debe tener fecha de fin.'}
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name} - {self.institution}'
+
+    def to_public_dict(self):
+        return {
+            'name': self.name,
+            'institution': self.institution,
+            'type': self.type,
+            'status': self.status,
+            'startDate': self.start_date.isoformat(),
+            'endDate': self.end_date.isoformat() if self.end_date else None,
+            'url': self.url or None,
+        }

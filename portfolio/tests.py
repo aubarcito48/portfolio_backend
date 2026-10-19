@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection, transaction
 from django.test import TestCase, TransactionTestCase, override_settings
 
-from .models import Experiencia, Perfil, Tecnologia
+from .models import Experiencia, Formacion, Perfil, Tecnologia
 
 
 class PostgreSQLPersistenceTests(TransactionTestCase):
@@ -397,3 +397,182 @@ class ExperienciaApiTests(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Experiencia.objects.bulk_create([invalid_experience])
+
+
+class FormacionApiTests(TestCase):
+    def create_formacion(
+        self,
+        name,
+        institution,
+        type,
+        status,
+        start_date,
+        end_date=None,
+        url='',
+        order=0,
+        is_published=True,
+    ):
+        return Formacion.objects.create(
+            name=name,
+            institution=institution,
+            type=type,
+            status=status,
+            start_date=start_date,
+            end_date=end_date,
+            url=url,
+            order=order,
+            is_published=is_published,
+        )
+
+    def test_returns_published_studies_and_certifications_in_order(self):
+        self.create_formacion(
+            name='Tecnicatura Superior en Desarrollo de Software',
+            institution='Instituto Superior Politécnico de Córdoba (ISPC)',
+            type=Formacion.Type.STUDY,
+            status=Formacion.Status.IN_PROGRESS,
+            start_date=date(2022, 3, 1),
+            order=2,
+        )
+        certification = self.create_formacion(
+            name='Junior Full Stack Developer',
+            institution='Instituto Superior Politécnico de Córdoba (ISPC)',
+            type=Formacion.Type.CERTIFICATION,
+            status=Formacion.Status.COMPLETED,
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 12, 1),
+            url='https://example.com/certificate',
+            order=1,
+        )
+        self.create_formacion(
+            name='Formación borrador',
+            institution='Institución',
+            type=Formacion.Type.STUDY,
+            status=Formacion.Status.IN_PROGRESS,
+            start_date=date(2025, 1, 1),
+            order=0,
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/formacion/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            [
+                {
+                    'name': 'Junior Full Stack Developer',
+                    'institution': 'Instituto Superior Politécnico de Córdoba (ISPC)',
+                    'type': 'certification',
+                    'status': 'completed',
+                    'startDate': '2024-01-01',
+                    'endDate': '2024-12-01',
+                    'url': 'https://example.com/certificate',
+                },
+                {
+                    'name': 'Tecnicatura Superior en Desarrollo de Software',
+                    'institution': 'Instituto Superior Politécnico de Córdoba (ISPC)',
+                    'type': 'study',
+                    'status': 'in_progress',
+                    'startDate': '2022-03-01',
+                    'endDate': None,
+                    'url': None,
+                },
+            ],
+        )
+        self.assertEqual(response.json()[0]['name'], certification.name)
+
+    def test_returns_empty_list_when_no_education_is_published(self):
+        self.create_formacion(
+            name='Estudio borrador',
+            institution='Institución',
+            type=Formacion.Type.STUDY,
+            status=Formacion.Status.IN_PROGRESS,
+            start_date=date(2025, 1, 1),
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/formacion/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_resolves_equal_order_using_ascending_id(self):
+        first = self.create_formacion(
+            'Primero',
+            'Institución',
+            Formacion.Type.STUDY,
+            Formacion.Status.IN_PROGRESS,
+            date(2023, 1, 1),
+            order=1,
+        )
+        second = self.create_formacion(
+            'Segundo',
+            'Institución',
+            Formacion.Type.STUDY,
+            Formacion.Status.IN_PROGRESS,
+            date(2024, 1, 1),
+            order=1,
+        )
+
+        response = self.client.get('/api/v1/formacion/')
+
+        self.assertEqual(
+            [item['name'] for item in response.json()],
+            [first.name, second.name],
+        )
+
+    def test_rejects_end_date_before_start_date(self):
+        with self.assertRaises(ValidationError):
+            self.create_formacion(
+                name='Fechas inválidas',
+                institution='Institución',
+                type=Formacion.Type.STUDY,
+                status=Formacion.Status.COMPLETED,
+                start_date=date(2024, 1, 1),
+                end_date=date(2023, 12, 31),
+            )
+
+    def test_rejects_in_progress_education_with_end_date(self):
+        with self.assertRaises(ValidationError):
+            self.create_formacion(
+                name='Estudio en curso inválido',
+                institution='Institución',
+                type=Formacion.Type.STUDY,
+                status=Formacion.Status.IN_PROGRESS,
+                start_date=date(2024, 1, 1),
+                end_date=date(2024, 12, 31),
+            )
+
+    def test_rejects_completed_education_without_end_date(self):
+        with self.assertRaises(ValidationError):
+            self.create_formacion(
+                name='Formación finalizada inválida',
+                institution='Institución',
+                type=Formacion.Type.CERTIFICATION,
+                status=Formacion.Status.COMPLETED,
+                start_date=date(2024, 1, 1),
+            )
+
+    def test_rejects_invalid_optional_url(self):
+        with self.assertRaises(ValidationError):
+            self.create_formacion(
+                name='URL inválida',
+                institution='Institución',
+                type=Formacion.Type.CERTIFICATION,
+                status=Formacion.Status.IN_PROGRESS,
+                start_date=date(2024, 1, 1),
+                url='esto-no-es-una-url',
+            )
+
+    def test_database_rejects_completed_record_without_end_date(self):
+        invalid_record = Formacion(
+            name='Formación inválida',
+            institution='Institución',
+            type=Formacion.Type.STUDY,
+            status=Formacion.Status.COMPLETED,
+            start_date=date(2024, 1, 1),
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Formacion.objects.bulk_create([invalid_record])
