@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .models import Perfil, Tecnologia
+from .models import Experiencia, Perfil, Tecnologia
 
 
 @require_GET
@@ -35,3 +35,14 @@ def tecnologias_publicas(request):
         )
 
     return JsonResponse(groups, safe=False)
+
+
+@require_GET
+def experiencias_publicas(request):
+    experiencias = Experiencia.objects.filter(is_published=True).order_by(
+        'order', 'id'
+    )
+    return JsonResponse(
+        [experiencia.to_public_dict() for experiencia in experiencias],
+        safe=False,
+    )

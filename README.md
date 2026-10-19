@@ -149,6 +149,34 @@ publicadas, el endpoint devuelve HTTP 200 con `[]`. La migración inicial carga
 las tecnologías que muestra actualmente el frontend, y pueden administrarse
 en Django Admin.
 
+### Experiencias profesionales
+
+`GET /api/v1/experiencias/` devuelve HTTP 200 con una lista ordenada de
+experiencias publicadas:
+
+```json
+[
+  {
+    "title": "Puesto",
+    "organization": "Organización",
+    "description": "Descripción de la experiencia.",
+    "startDate": "2022-03-01",
+    "endDate": null,
+    "isCurrent": true
+  }
+]
+```
+
+Las fechas usan el formato ISO `YYYY-MM-DD`. Para experiencias actuales,
+`endDate` es `null`; una fecha final no puede ser anterior a la inicial, y una
+experiencia actual no puede tener fecha final. El endpoint devuelve `[]` si no
+hay experiencias publicadas.
+
+El frontend existente no contiene registros de experiencia con puestos,
+organizaciones y fechas verificables. Por eso la migración crea el modelo, pero
+no inventa ni precarga experiencias; los datos validados se pueden cargar en
+Django Admin.
+
 ## Relación con el frontend
 
 El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:

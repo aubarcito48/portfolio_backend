@@ -72,3 +72,57 @@ class Tecnologia(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.category})'
+
+
+class Experiencia(models.Model):
+    title = models.CharField(max_length=150)
+    organization = models.CharField(max_length=150)
+    description = models.TextField()
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_current = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('order', 'id')
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(end_date__isnull=True) | Q(end_date__gte=models.F('start_date')),
+                name='portfolio_experience_valid_date_range',
+            ),
+            models.CheckConstraint(
+                condition=Q(is_current=False) | Q(end_date__isnull=True),
+                name='portfolio_current_experience_without_end_date',
+            ),
+        ]
+        verbose_name = 'experiencia profesional'
+        verbose_name_plural = 'experiencias profesionales'
+
+    def clean(self):
+        super().clean()
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError(
+                {'end_date': 'La fecha de fin no puede ser anterior a la fecha de inicio.'}
+            )
+        if self.is_current and self.end_date:
+            raise ValidationError(
+                {'end_date': 'Una experiencia actual no puede tener fecha de fin.'}
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.title} - {self.organization}'
+
+    def to_public_dict(self):
+        return {
+            'title': self.title,
+            'organization': self.organization,
+            'description': self.description,
+            'startDate': self.start_date.isoformat(),
+            'endDate': self.end_date.isoformat() if self.end_date else None,
+            'isCurrent': self.is_current,
+        }

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Perfil, Tecnologia
+from .models import Experiencia, Perfil, Tecnologia
 
 
 @admin.register(Perfil)
@@ -18,4 +18,21 @@ class TecnologiaAdmin(admin.ModelAdmin):
     list_filter = ('category', 'is_published')
     list_editable = ('order', 'is_published')
     search_fields = ('name', 'category')
+    ordering = ('order', 'id')
+
+
+@admin.register(Experiencia)
+class ExperienciaAdmin(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'organization',
+        'start_date',
+        'end_date',
+        'is_current',
+        'is_published',
+        'order',
+    )
+    list_filter = ('is_current', 'is_published')
+    list_editable = ('is_current', 'is_published', 'order')
+    search_fields = ('title', 'organization', 'description')
     ordering = ('order', 'id')

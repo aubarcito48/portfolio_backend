@@ -1,9 +1,11 @@
+from datetime import date
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection, transaction
 from django.test import TestCase, TransactionTestCase, override_settings
 
-from .models import Perfil, Tecnologia
+from .models import Experiencia, Perfil, Tecnologia
 
 
 class PostgreSQLPersistenceTests(TransactionTestCase):
@@ -237,3 +239,161 @@ class TecnologiaApiTests(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Tecnologia.objects.bulk_create([duplicate])
+
+
+class ExperienciaApiTests(TestCase):
+    def create_experiencia(
+        self,
+        title,
+        organization,
+        start_date,
+        end_date=None,
+        is_current=False,
+        order=0,
+        is_published=True,
+    ):
+        return Experiencia.objects.create(
+            title=title,
+            organization=organization,
+            description=f'Descripción de {title}.',
+            start_date=start_date,
+            end_date=end_date,
+            is_current=is_current,
+            order=order,
+            is_published=is_published,
+        )
+
+    def test_returns_only_published_experiences_in_order(self):
+        self.create_experiencia(
+            'Experiencia finalizada',
+            'Organización anterior',
+            date(2020, 1, 1),
+            end_date=date(2021, 6, 30),
+            order=2,
+        )
+        current = self.create_experiencia(
+            'Experiencia actual',
+            'Organización actual',
+            date(2022, 3, 1),
+            is_current=True,
+            order=1,
+        )
+        self.create_experiencia(
+            'Experiencia no publicada',
+            'Borrador',
+            date(2024, 1, 1),
+            is_current=True,
+            order=0,
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/experiencias/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            [
+                {
+                    'title': 'Experiencia actual',
+                    'organization': 'Organización actual',
+                    'description': 'Descripción de Experiencia actual.',
+                    'startDate': '2022-03-01',
+                    'endDate': None,
+                    'isCurrent': True,
+                },
+                {
+                    'title': 'Experiencia finalizada',
+                    'organization': 'Organización anterior',
+                    'description': 'Descripción de Experiencia finalizada.',
+                    'startDate': '2020-01-01',
+                    'endDate': '2021-06-30',
+                    'isCurrent': False,
+                },
+            ],
+        )
+        self.assertIsNone(response.json()[0]['endDate'])
+
+    def test_returns_empty_list_when_no_experiences_are_published(self):
+        self.create_experiencia(
+            'Experiencia borrador',
+            'Organización',
+            date(2024, 1, 1),
+            is_current=True,
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/experiencias/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_resolves_equal_order_using_ascending_id(self):
+        first = self.create_experiencia(
+            'Primera',
+            'Organización',
+            date(2020, 1, 1),
+            is_current=True,
+            order=1,
+        )
+        second = self.create_experiencia(
+            'Segunda',
+            'Organización',
+            date(2021, 1, 1),
+            is_current=True,
+            order=1,
+        )
+
+        response = self.client.get('/api/v1/experiencias/')
+
+        self.assertEqual(
+            [item['title'] for item in response.json()],
+            [first.title, second.title],
+        )
+
+    def test_rejects_end_date_before_start_date(self):
+        with self.assertRaises(ValidationError):
+            self.create_experiencia(
+                'Fechas inválidas',
+                'Organización',
+                date(2023, 1, 1),
+                end_date=date(2022, 12, 31),
+            )
+
+    def test_rejects_current_experience_with_end_date(self):
+        with self.assertRaises(ValidationError):
+            self.create_experiencia(
+                'Empleo actual inválido',
+                'Organización',
+                date(2023, 1, 1),
+                end_date=date(2024, 1, 1),
+                is_current=True,
+            )
+
+    def test_database_rejects_invalid_date_range_from_bulk_create(self):
+        invalid_experience = Experiencia(
+            title='Fechas inválidas',
+            organization='Organización',
+            description='Descripción',
+            start_date=date(2023, 1, 1),
+            end_date=date(2022, 12, 31),
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Experiencia.objects.bulk_create([invalid_experience])
+
+    def test_database_rejects_current_experience_with_end_date_from_bulk_create(
+        self,
+    ):
+        invalid_experience = Experiencia(
+            title='Empleo actual inválido',
+            organization='Organización',
+            description='Descripción',
+            start_date=date(2023, 1, 1),
+            end_date=date(2024, 1, 1),
+            is_current=True,
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Experiencia.objects.bulk_create([invalid_experience])
