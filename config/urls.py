@@ -14,11 +14,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 from portfolio.admin import portfolio_admin_site
+from portfolio.views import api_not_found
 
 urlpatterns = [
     path('admin/', portfolio_admin_site.urls),
     path('api/v1/', include('portfolio.urls')),
+    re_path(r'^api/.*$', api_not_found),
 ]
+
+handler404 = api_not_found

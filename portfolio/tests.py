@@ -178,7 +178,7 @@ class TecnologiaApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'name': 'Frontend',
@@ -216,7 +216,10 @@ class TecnologiaApiTests(TestCase):
         response = self.client.get('/api/v1/tecnologias/')
 
         self.assertEqual(
-            [item['name'] for item in response.json()[0]['technologies']],
+            [
+                item['name']
+                for item in response.json()['results'][0]['technologies']
+            ],
             [first.name, second.name],
         )
 
@@ -230,7 +233,8 @@ class TecnologiaApiTests(TestCase):
         response = self.client.get('/api/v1/tecnologias/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_duplicate_name_within_category_case_insensitively(self):
         self.create_tecnologia('Python', 'Backend')
@@ -305,7 +309,7 @@ class ExperienciaApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'title': 'Experiencia actual',
@@ -325,7 +329,7 @@ class ExperienciaApiTests(TestCase):
                 },
             ],
         )
-        self.assertIsNone(response.json()[0]['endDate'])
+        self.assertIsNone(response.json()['results'][0]['endDate'])
 
     def test_returns_empty_list_when_no_experiences_are_published(self):
         self.create_experiencia(
@@ -339,7 +343,8 @@ class ExperienciaApiTests(TestCase):
         response = self.client.get('/api/v1/experiencias/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_resolves_equal_order_using_ascending_id(self):
         first = self.create_experiencia(
@@ -360,7 +365,7 @@ class ExperienciaApiTests(TestCase):
         response = self.client.get('/api/v1/experiencias/')
 
         self.assertEqual(
-            [item['title'] for item in response.json()],
+            [item['title'] for item in response.json()['results']],
             [first.title, second.title],
         )
 
@@ -471,7 +476,7 @@ class FormacionApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'name': 'Junior Full Stack Developer',
@@ -493,7 +498,10 @@ class FormacionApiTests(TestCase):
                 },
             ],
         )
-        self.assertEqual(response.json()[0]['name'], certification.name)
+        self.assertEqual(
+            response.json()['results'][0]['name'],
+            certification.name,
+        )
 
     def test_returns_empty_list_when_no_education_is_published(self):
         self.create_formacion(
@@ -508,7 +516,8 @@ class FormacionApiTests(TestCase):
         response = self.client.get('/api/v1/formacion/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_resolves_equal_order_using_ascending_id(self):
         first = self.create_formacion(
@@ -531,7 +540,7 @@ class FormacionApiTests(TestCase):
         response = self.client.get('/api/v1/formacion/')
 
         self.assertEqual(
-            [item['name'] for item in response.json()],
+            [item['name'] for item in response.json()['results']],
             [first.name, second.name],
         )
 
@@ -661,11 +670,11 @@ class ProyectoApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            [project['slug'] for project in response.json()],
+            [project['slug'] for project in response.json()['results']],
             [first.slug, later.slug],
         )
         self.assertEqual(
-            response.json()[0],
+            response.json()['results'][0],
             {
                 'name': 'Proyecto primero',
                 'slug': 'proyecto-primero',
@@ -736,7 +745,8 @@ class ProyectoApiTests(TestCase):
         response = self.client.get('/api/v1/proyectos/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_duplicate_slug(self):
         self.create_project('Primero', 'proyecto')
@@ -785,7 +795,7 @@ class ProyectoApiTests(TestCase):
         response = self.client.get('/api/v1/proyectos/')
 
         self.assertEqual(
-            [item['slug'] for item in response.json()],
+            [item['slug'] for item in response.json()['results']],
             ['proyecto'],
         )
 
@@ -835,14 +845,14 @@ class EnlaceApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {'label': first.label, 'type': first.type, 'url': first.url},
                 {'label': second.label, 'type': second.type, 'url': second.url},
             ],
         )
         self.assertEqual(
-            set(response.json()[0]),
+            set(response.json()['results'][0]),
             {'label', 'type', 'url'},
         )
 
@@ -861,7 +871,7 @@ class EnlaceApiTests(TestCase):
         response = self.client.get('/api/v1/enlaces/')
 
         self.assertEqual(
-            [item['label'] for item in response.json()],
+            [item['label'] for item in response.json()['results']],
             [first.label, second.label],
         )
 
@@ -876,7 +886,8 @@ class EnlaceApiTests(TestCase):
         response = self.client.get('/api/v1/enlaces/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_invalid_url(self):
         with self.assertRaises(ValidationError):
@@ -890,6 +901,220 @@ class EnlaceApiTests(TestCase):
         response = self.client.post('/api/v1/enlaces/')
 
         self.assertEqual(response.status_code, 405)
+
+
+class PublicApiContractTests(TestCase):
+    public_routes = (
+        '/api/v1/perfil/',
+        '/api/v1/tecnologias/',
+        '/api/v1/experiencias/',
+        '/api/v1/formacion/',
+        '/api/v1/enlaces/',
+        '/api/v1/proyectos/',
+        '/api/v1/proyectos/pintaebook/',
+    )
+
+    def test_public_routes_allow_get_head_and_options_without_authentication(self):
+        for url in self.public_routes:
+            with self.subTest(url=url):
+                get_response = self.client.get(url)
+                self.assertEqual(get_response.status_code, 200)
+                head_response = self.client.head(url)
+                self.assertEqual(head_response.status_code, 200)
+                self.assertEqual(head_response.content, b'')
+                options_response = self.client.options(url)
+                self.assertEqual(options_response.status_code, 204)
+                self.assertEqual(
+                    options_response.headers['Allow'],
+                    'GET, HEAD, OPTIONS',
+                )
+
+    def test_authenticated_admin_cannot_write_to_public_routes(self):
+        administrator = get_user_model().objects.create_superuser(
+            username='public-api-admin',
+            email='admin@example.com',
+        )
+        self.client.force_login(administrator)
+        methods = ('post', 'put', 'patch', 'delete')
+
+        def snapshot():
+            return {
+                'profiles': list(Perfil.objects.order_by('pk').values()),
+                'technologies': list(Tecnologia.objects.order_by('pk').values()),
+                'experiences': list(Experiencia.objects.order_by('pk').values()),
+                'education': list(Formacion.objects.order_by('pk').values()),
+                'links': list(Enlace.objects.order_by('pk').values()),
+                'projects': list(Proyecto.objects.order_by('pk').values()),
+                'project_technologies': list(
+                    Proyecto.technologies.through.objects.order_by('pk').values()
+                ),
+                'additional_links': list(
+                    EnlaceProyecto.objects.order_by('pk').values()
+                ),
+            }
+
+        initial_data = snapshot()
+
+        for url in self.public_routes:
+            for method in methods:
+                with self.subTest(url=url, method=method):
+                    response = getattr(self.client, method)(url, {})
+                    self.assertEqual(response.status_code, 405)
+                    self.assertEqual(
+                        response.json(),
+                        {'detail': 'Método no permitido.'},
+                    )
+                    self.assertEqual(
+                        response.headers['Allow'],
+                        'GET, HEAD, OPTIONS',
+                    )
+
+        self.assertEqual(snapshot(), initial_data)
+
+    def test_unknown_api_route_returns_documented_json_404(self):
+        response = self.client.get('/api/v1/no-existe/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'No se encontró el recurso solicitado.'},
+        )
+
+    def test_invalid_page_size_returns_detail_without_internal_information(self):
+        response = self.client.get('/api/v1/enlaces/?page_size=invalid')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'page_size debe ser un entero mayor que cero.'},
+        )
+
+    def test_all_list_endpoints_use_paginated_envelope(self):
+        list_urls = (
+            '/api/v1/tecnologias/',
+            '/api/v1/experiencias/',
+            '/api/v1/formacion/',
+            '/api/v1/enlaces/',
+            '/api/v1/proyectos/',
+        )
+
+        for url in list_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    set(response.json()),
+                    {'count', 'next', 'previous', 'results'},
+                )
+                self.assertIsInstance(response.json()['count'], int)
+                self.assertIsInstance(response.json()['results'], list)
+
+    def test_profile_and_project_detail_keep_single_object_responses(self):
+        profile = self.client.get('/api/v1/perfil/').json()
+        project = self.client.get(
+            '/api/v1/proyectos/pintaebook/'
+        ).json()
+
+        self.assertIn('name', profile)
+        self.assertNotIn('results', profile)
+        self.assertEqual(project['slug'], 'pintaebook')
+        self.assertNotIn('results', project)
+
+
+class ApiPaginationTests(TestCase):
+    def test_technology_pagination_preserves_grouped_shape_across_pages(self):
+        Tecnologia.objects.all().delete()
+        for index in range(21):
+            Tecnologia.objects.create(
+                name=f'Technology {index:02}',
+                category='Frontend',
+                url=f'https://example.com/technology-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        first_page = self.client.get(
+            '/api/v1/tecnologias/?page_size=20'
+        ).json()
+        second_page = self.client.get(first_page['next']).json()
+
+        self.assertEqual(first_page['count'], 21)
+        self.assertEqual(len(first_page['results'][0]['technologies']), 20)
+        self.assertEqual(len(second_page['results'][0]['technologies']), 1)
+        self.assertEqual(first_page['results'][0]['name'], 'Frontend')
+        self.assertEqual(second_page['results'][0]['name'], 'Frontend')
+        names = [
+            technology['name']
+            for page in (first_page, second_page)
+            for group in page['results']
+            for technology in group['technologies']
+        ]
+        self.assertEqual(len(names), 21)
+        self.assertEqual(len(set(names)), 21)
+
+    def test_default_page_size_and_page_links_do_not_omit_or_repeat_records(self):
+        Enlace.objects.all().delete()
+        for index in range(21):
+            Enlace.objects.create(
+                label=f'Perfil {index:02}',
+                type=f'profile-{index}',
+                url=f'https://example.com/profile-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        first_page = self.client.get('/api/v1/enlaces/').json()
+
+        self.assertEqual(first_page['count'], 21)
+        self.assertEqual(len(first_page['results']), 20)
+        self.assertIsNone(first_page['previous'])
+        self.assertIsNotNone(first_page['next'])
+        self.assertIn('page=2', first_page['next'])
+
+        second_page = self.client.get(first_page['next']).json()
+
+        self.assertEqual(len(second_page['results']), 1)
+        self.assertIsNone(second_page['next'])
+        self.assertIn('page=1', second_page['previous'])
+        all_labels = [
+            item['label']
+            for item in first_page['results'] + second_page['results']
+        ]
+        self.assertEqual(len(all_labels), 21)
+        self.assertEqual(len(set(all_labels)), 21)
+
+    def test_page_size_can_be_set_and_is_capped_at_100(self):
+        for index in range(101):
+            Enlace.objects.create(
+                label=f'Link {index:03}',
+                type=f'link-{index}',
+                url=f'https://example.com/link-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        custom_size = self.client.get(
+            '/api/v1/enlaces/?page_size=7'
+        ).json()
+        capped_size = self.client.get(
+            '/api/v1/enlaces/?page_size=500'
+        ).json()
+
+        self.assertEqual(len(custom_size['results']), 7)
+        self.assertIn('page_size=7', custom_size['next'])
+        self.assertEqual(capped_size['count'], 103)
+        self.assertEqual(len(capped_size['results']), 100)
+        self.assertIn('page_size=500', capped_size['next'])
+
+    def test_out_of_range_and_non_numeric_pages_return_json_404(self):
+        for query in ('page=2', 'page=not-a-number', 'page=0'):
+            with self.subTest(query=query):
+                response = self.client.get(f'/api/v1/enlaces/?{query}')
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(
+                    response.json(),
+                    {'detail': 'La página solicitada no existe.'},
+                )
 
 
 class ContentValidationTests(TestCase):
@@ -1254,7 +1479,7 @@ class DjangoAdminPermissionTests(TestCase):
         self.assertEqual(response.status_code, 302)
         link.refresh_from_db()
         self.assertFalse(link.is_published)
-        public_links = self.client.get('/api/v1/enlaces/').json()
+        public_links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertNotIn(link.url, [item['url'] for item in public_links])
 
     def test_editor_admin_changes_to_all_content_types_are_saved_and_public(self):
@@ -1289,7 +1514,9 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(technology_response.status_code, 302)
-        technologies = self.client.get('/api/v1/tecnologias/').json()
+        technologies = self.client.get(
+            '/api/v1/tecnologias/?page_size=100'
+        ).json()['results']
         self.assertIn(
             'Admin Published Technology',
             [
@@ -1313,7 +1540,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(experience_response.status_code, 302)
-        experiences = self.client.get('/api/v1/experiencias/').json()
+        experiences = self.client.get('/api/v1/experiencias/').json()['results']
         self.assertIn(
             'Experiencia desde Admin',
             [item['title'] for item in experiences],
@@ -1334,7 +1561,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(education_response.status_code, 302)
-        education = self.client.get('/api/v1/formacion/').json()
+        education = self.client.get('/api/v1/formacion/').json()['results']
         self.assertIn(
             'Formación desde Admin',
             [item['name'] for item in education],
@@ -1390,7 +1617,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(link_response.status_code, 302)
-        links = self.client.get('/api/v1/enlaces/').json()
+        links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertIn(
             'https://example.com/admin-link',
             [item['url'] for item in links],
@@ -1428,7 +1655,9 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        technologies = self.client.get('/api/v1/tecnologias/').json()
+        technologies = self.client.get(
+            '/api/v1/tecnologias/?page_size=100'
+        ).json()['results']
         self.assertNotIn(
             technology.name,
             [
@@ -1457,7 +1686,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        experiences = self.client.get('/api/v1/experiencias/').json()
+        experiences = self.client.get('/api/v1/experiencias/').json()['results']
         self.assertNotIn(
             experience.title,
             [item['title'] for item in experiences],
@@ -1483,7 +1712,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        education = self.client.get('/api/v1/formacion/').json()
+        education = self.client.get('/api/v1/formacion/').json()['results']
         self.assertNotIn(
             education_record.name,
             [item['name'] for item in education],
@@ -1538,7 +1767,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        links = self.client.get('/api/v1/enlaces/').json()
+        links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertNotIn(link.url, [item['url'] for item in links])
 
     def test_editor_cannot_delete_records_without_explicit_delete_permission(self):
