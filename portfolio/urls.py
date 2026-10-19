@@ -13,4 +13,10 @@ urlpatterns = [
         name='experiencias-publicas',
     ),
     path('formacion/', views.formacion_publica, name='formacion-publica'),
+    path('proyectos/', views.proyectos_publicos, name='proyectos-publicos'),
+    path(
+        'proyectos/<slug:slug>/',
+        views.detalle_proyecto_publico,
+        name='detalle-proyecto-publico',
+    ),
 ]

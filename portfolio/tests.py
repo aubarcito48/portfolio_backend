@@ -5,7 +5,14 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection, transaction
 from django.test import TestCase, TransactionTestCase, override_settings
 
-from .models import Experiencia, Formacion, Perfil, Tecnologia
+from .models import (
+    EnlaceProyecto,
+    Experiencia,
+    Formacion,
+    Perfil,
+    Proyecto,
+    Tecnologia,
+)
 
 
 class PostgreSQLPersistenceTests(TransactionTestCase):
@@ -576,3 +583,201 @@ class FormacionApiTests(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Formacion.objects.bulk_create([invalid_record])
+
+
+class ProyectoApiTests(TestCase):
+    def setUp(self):
+        Proyecto.objects.all().delete()
+
+    def create_project(
+        self,
+        title,
+        slug,
+        order=0,
+        is_published=True,
+        demo_url='',
+        repository_url='',
+        image_url='',
+    ):
+        return Proyecto.objects.create(
+            title=title,
+            slug=slug,
+            summary=f'Resumen de {title}.',
+            description=f'Descripción de {title}.',
+            project_type='Proyecto en equipo',
+            image_url=image_url,
+            image_alt=f'Imagen de {title}',
+            demo_url=demo_url,
+            repository_url=repository_url,
+            order=order,
+            is_published=is_published,
+        )
+
+    def create_technology(self, name, published=True):
+        return Tecnologia.objects.create(
+            name=name,
+            category='Proyecto',
+            url=f'https://docs.example.com/{name.lower()}',
+            is_published=published,
+        )
+
+    def test_list_returns_published_projects_with_only_published_technologies(self):
+        later = self.create_project('Proyecto tardío', 'proyecto-tardio', order=2)
+        first = self.create_project(
+            'Proyecto primero',
+            'proyecto-primero',
+            order=1,
+            demo_url='https://demo.example.com',
+            repository_url='https://github.com/example/project',
+            image_url='/assets/project.png',
+        )
+        draft = self.create_project(
+            'Proyecto borrador',
+            'proyecto-borrador',
+            order=0,
+            is_published=False,
+        )
+        published_technology = self.create_technology('Django')
+        unpublished_technology = self.create_technology(
+            'DraftTech',
+            published=False,
+        )
+        first.technologies.add(published_technology, unpublished_technology)
+        EnlaceProyecto.objects.create(
+            project=first,
+            label='Frontend',
+            url='https://github.com/example/frontend',
+        )
+        draft.technologies.add(published_technology)
+
+        response = self.client.get('/api/v1/proyectos/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [project['slug'] for project in response.json()],
+            [first.slug, later.slug],
+        )
+        self.assertEqual(
+            response.json()[0],
+            {
+                'name': 'Proyecto primero',
+                'slug': 'proyecto-primero',
+                'summary': 'Resumen de Proyecto primero.',
+                'type': 'Proyecto en equipo',
+                'image': '/assets/project.png',
+                'imageAlt': 'Imagen de Proyecto primero',
+                'description': 'Descripción de Proyecto primero.',
+                'technologies': ['Django'],
+                'links': [
+                    {'label': 'Ver demo', 'url': 'https://demo.example.com'},
+                    {
+                        'label': 'Repositorio',
+                        'url': 'https://github.com/example/project',
+                    },
+                    {
+                        'label': 'Frontend',
+                        'url': 'https://github.com/example/frontend',
+                    },
+                ],
+            },
+        )
+        self.assertNotIn(unpublished_technology.name, response.content.decode())
+        self.assertNotIn(draft.title, response.content.decode())
+
+    def test_detail_returns_published_project(self):
+        project = self.create_project('Proyecto publicado', 'publicado')
+        technology = self.create_technology('Python')
+        project.technologies.add(technology)
+
+        response = self.client.get('/api/v1/proyectos/publicado/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['slug'], 'publicado')
+        self.assertEqual(response.json()['technologies'], ['Python'])
+
+    def test_detail_returns_404_for_missing_slug(self):
+        response = self.client.get('/api/v1/proyectos/no-existe/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'No se encontró el proyecto publicado.'},
+        )
+
+    def test_detail_returns_404_for_unpublished_project(self):
+        self.create_project(
+            'Proyecto borrador',
+            'borrador',
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/proyectos/borrador/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'No se encontró el proyecto publicado.'},
+        )
+
+    def test_list_returns_empty_list_when_no_projects_are_published(self):
+        self.create_project(
+            'Proyecto borrador',
+            'borrador',
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/proyectos/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_rejects_duplicate_slug(self):
+        self.create_project('Primero', 'proyecto')
+
+        with self.assertRaises(ValidationError):
+            self.create_project('Duplicado', 'proyecto')
+
+    def test_database_rejects_duplicate_slug_from_bulk_create(self):
+        self.create_project('Primero', 'proyecto')
+        duplicate = Proyecto(
+            title='Duplicado',
+            slug='proyecto',
+            summary='Resumen',
+            description='Descripción',
+            project_type='Proyecto en equipo',
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Proyecto.objects.bulk_create([duplicate])
+
+    def test_rejects_invalid_optional_urls(self):
+        with self.assertRaises(ValidationError):
+            self.create_project(
+                'URL inválida',
+                'url-invalida',
+                demo_url='esto-no-es-una-url',
+            )
+
+    def test_accepts_frontend_relative_image_path(self):
+        project = self.create_project(
+            'Imagen local',
+            'imagen-local',
+            image_url='/assets/project.png',
+        )
+
+        self.assertEqual(project.image_url, '/assets/project.png')
+
+    def test_list_does_not_duplicate_project_with_multiple_technologies(self):
+        project = self.create_project('Proyecto', 'proyecto')
+        project.technologies.add(
+            self.create_technology('Python'),
+            self.create_technology('Django'),
+        )
+
+        response = self.client.get('/api/v1/proyectos/')
+
+        self.assertEqual(
+            [item['slug'] for item in response.json()],
+            ['proyecto'],
+        )

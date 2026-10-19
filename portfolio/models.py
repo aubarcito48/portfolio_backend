@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Q
 
@@ -202,3 +203,104 @@ class Formacion(models.Model):
             'endDate': self.end_date.isoformat() if self.end_date else None,
             'url': self.url or None,
         }
+
+
+def validate_project_image_url(value):
+    if value.startswith('/') and not value.startswith('//'):
+        return
+    URLValidator(schemes=('http', 'https'))(value)
+
+
+class Proyecto(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+    summary = models.CharField(max_length=300)
+    description = models.TextField()
+    project_type = models.CharField(max_length=100)
+    image_url = models.CharField(
+        max_length=500,
+        blank=True,
+        validators=[validate_project_image_url],
+    )
+    image_alt = models.CharField(max_length=300, blank=True)
+    demo_url = models.URLField(max_length=500, blank=True)
+    demo_label = models.CharField(max_length=100, blank=True, default='Ver demo')
+    repository_url = models.URLField(max_length=500, blank=True)
+    repository_label = models.CharField(
+        max_length=100,
+        blank=True,
+        default='Repositorio',
+    )
+    technologies = models.ManyToManyField(
+        Tecnologia,
+        related_name='projects',
+        blank=True,
+    )
+    order = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('order', 'id')
+        verbose_name = 'proyecto'
+        verbose_name_plural = 'proyectos'
+
+    def clean(self):
+        super().clean()
+        if self.image_url:
+            validate_project_image_url(self.image_url)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    def to_public_dict(self):
+        technologies = getattr(
+            self,
+            'published_technologies',
+            self.technologies.filter(is_published=True).order_by('order', 'id'),
+        )
+        links = []
+        if self.demo_url:
+            links.append({'label': self.demo_label, 'url': self.demo_url})
+        if self.repository_url:
+            links.append(
+                {'label': self.repository_label, 'url': self.repository_url}
+            )
+        links.extend(
+            {'label': link.label, 'url': link.url}
+            for link in self.additional_links.all()
+        )
+
+        return {
+            'name': self.title,
+            'slug': self.slug,
+            'summary': self.summary,
+            'type': self.project_type,
+            'image': self.image_url,
+            'imageAlt': self.image_alt,
+            'description': self.description,
+            'technologies': [technology.name for technology in technologies],
+            'links': links,
+        }
+
+
+class EnlaceProyecto(models.Model):
+    project = models.ForeignKey(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name='additional_links',
+    )
+    label = models.CharField(max_length=100)
+    url = models.URLField(max_length=500)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ('order', 'id')
+        verbose_name = 'enlace adicional del proyecto'
+        verbose_name_plural = 'enlaces adicionales del proyecto'
+
+    def __str__(self):
+        return f'{self.label} - {self.project.title}'

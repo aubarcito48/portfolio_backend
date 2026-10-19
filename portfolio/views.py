@@ -1,7 +1,8 @@
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .models import Experiencia, Formacion, Perfil, Tecnologia
+from .models import Experiencia, Formacion, Perfil, Proyecto, Tecnologia
 
 
 @require_GET
@@ -57,3 +58,51 @@ def formacion_publica(request):
         [registro.to_public_dict() for registro in registros],
         safe=False,
     )
+
+
+@require_GET
+def proyectos_publicos(request):
+    proyectos = (
+        Proyecto.objects.filter(is_published=True)
+        .prefetch_related(
+            Prefetch(
+                'technologies',
+                queryset=Tecnologia.objects.filter(is_published=True).order_by(
+                    'order', 'id'
+                ),
+                to_attr='published_technologies',
+            ),
+            'additional_links',
+        )
+        .order_by('order', 'id')
+    )
+    return JsonResponse(
+        [proyecto.to_public_dict() for proyecto in proyectos],
+        safe=False,
+    )
+
+
+@require_GET
+def detalle_proyecto_publico(request, slug):
+    try:
+        proyecto = (
+            Proyecto.objects.filter(is_published=True)
+            .prefetch_related(
+                Prefetch(
+                    'technologies',
+                    queryset=Tecnologia.objects.filter(
+                        is_published=True
+                    ).order_by('order', 'id'),
+                    to_attr='published_technologies',
+                ),
+                'additional_links',
+            )
+            .get(slug=slug)
+        )
+    except Proyecto.DoesNotExist:
+        return JsonResponse(
+            {'detail': 'No se encontró el proyecto publicado.'},
+            status=404,
+        )
+
+    return JsonResponse(proyecto.to_public_dict())

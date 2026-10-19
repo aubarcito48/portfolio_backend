@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Experiencia, Formacion, Perfil, Tecnologia
+from .models import (
+    EnlaceProyecto,
+    Experiencia,
+    Formacion,
+    Perfil,
+    Proyecto,
+    Tecnologia,
+)
 
 
 @admin.register(Perfil)
@@ -53,4 +60,21 @@ class FormacionAdmin(admin.ModelAdmin):
     list_filter = ('type', 'status', 'is_published')
     list_editable = ('status', 'is_published', 'order')
     search_fields = ('name', 'institution')
+    ordering = ('order', 'id')
+
+
+class EnlaceProyectoInline(admin.TabularInline):
+    model = EnlaceProyecto
+    extra = 0
+
+
+@admin.register(Proyecto)
+class ProyectoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'order', 'is_published')
+    list_filter = ('is_published', 'project_type')
+    list_editable = ('order', 'is_published')
+    search_fields = ('title', 'summary', 'description')
+    prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('technologies',)
+    inlines = (EnlaceProyectoInline,)
     ordering = ('order', 'id')

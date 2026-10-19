@@ -122,6 +122,53 @@ un perfil publicado, responde HTTP 404:
 Los endpoints de consulta permiten únicamente `GET`; los demás métodos
 responden HTTP 405.
 
+### Proyectos
+
+`GET /api/v1/proyectos/` devuelve los proyectos publicados en orden ascendente
+por `order` y, para empates, por ID. `GET /api/v1/proyectos/{slug}/` devuelve
+el detalle de un proyecto publicado. El formato mantiene los campos que usa el
+frontend:
+
+```json
+{
+  "name": "PintaEbook",
+  "slug": "pintaebook",
+  "summary": "Plataforma de libros y ebooks desarrollada por el equipo ISPC / ProCoders.",
+  "type": "Proyecto en equipo",
+  "image": "/assets/pintaebook.png",
+  "imageAlt": "Página de inicio de PintaEbook con su presentación y navegación",
+  "description": "Descripción del proyecto.",
+  "technologies": ["Angular", "Python", "Django"],
+  "links": [
+    {
+      "label": "Ver demo",
+      "url": "https://pinta-ebook-eta.vercel.app/"
+    }
+  ]
+}
+```
+
+Cada tecnología aparece como máximo una vez por proyecto y solo si está
+publicada. Los proyectos despublicados no aparecen en el listado ni en detalle.
+Una imagen puede ser una ruta local del frontend (por ejemplo
+`/assets/pintaebook.png`) o una URL HTTP/HTTPS; demo, repositorio y enlaces
+adicionales, cuando se proporcionan, deben ser URLs válidas. Si no hay
+proyectos publicados, el listado responde HTTP 200 con `[]`. Para un slug
+inexistente o despublicado, el detalle responde HTTP 404:
+
+```json
+{
+  "detail": "No se encontró el proyecto publicado."
+}
+```
+
+La migración inicial carga los proyectos PintaEbook y DGES con la información
+y enlaces definidos en el frontend. Incluye los enlaces adicionales de
+frontend/backend y todos sus conocimientos técnicos; HTML, CSS y AJAX se
+incorporan al catálogo de tecnologías porque están asociados al proyecto DGES.
+Los proyectos, sus tecnologías y enlaces adicionales pueden administrarse en
+Django Admin.
+
 ### Tecnologías
 
 `GET /api/v1/tecnologias/` devuelve HTTP 200 y una lista de grupos compatible
