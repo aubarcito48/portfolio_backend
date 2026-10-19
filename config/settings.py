@@ -70,6 +70,12 @@ elif not allowed_hosts and ENVIRONMENT == 'test':
 
 ALLOWED_HOSTS = allowed_hosts
 
+if ENVIRONMENT == 'production':
+    # Render terminates HTTPS at its trusted reverse proxy.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
 
 def parse_trusted_origins(variable_name, default=''):
     configured_origins = os.getenv(variable_name, default)
@@ -131,6 +137,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -261,7 +268,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Email
@@ -269,6 +277,17 @@ STATIC_URL = 'static/'
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': (
+            'django.core.mail.backends.dummy.EmailBackend'
+            if ENVIRONMENT == 'production'
+            else 'django.core.mail.backends.console.EmailBackend'
+        ),
     },
 }
+
+if ENVIRONMENT == 'production':
+    # This read-only API/Admin has no email workflows. Explicitly disable mail
+    # rather than configure unused SMTP or print private mail to production logs.
+    # Django flags dummy mail as non-production: exempt only that intentional
+    # choice; all unrelated deployment/security checks stay enabled.
+    SILENCED_SYSTEM_CHECKS = ['mail.E001']

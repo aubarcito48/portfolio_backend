@@ -1,0 +1,101 @@
+{
+  "startedAt": "2026-10-19T16:05:01.978901+00:00",
+  "dotenvDisabled": true,
+  "database": "isolated newly initialized local PostgreSQL cluster; synthetic configuration",
+  "steps": [
+    {
+      "name": "start-isolated-postgres",
+      "exitCode": 0,
+      "stdout": "esperando que el servidor se inicie.... listo\nservidor iniciado\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "dependency-consistency",
+      "exitCode": 0,
+      "stdout": "No broken requirements found.\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "django-check",
+      "exitCode": 0,
+      "stdout": "System check identified no issues (0 silenced).\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "collectstatic",
+      "exitCode": 0,
+      "stdout": "\n0 static files copied to 'C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\staticfiles', 130 unmodified.\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "migration-drift",
+      "exitCode": 0,
+      "stdout": "No changes detected\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "full-postgresql-suite",
+      "exitCode": 0,
+      "stdout": "Found 106 test(s).\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default'...\n\n...{\"timestamp\": \"2026-10-19T16:05:08.102647+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:05:08.349825+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n...{\"timestamp\": \"2026-10-19T16:05:08.473755+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:05:08.474565+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:05:08.475337+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..............{\"timestamp\": \"2026-10-19T16:05:08.838838+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:05:08.839970+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:05:08.840830+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:05:08.950899+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T16:05:08.994203+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:05:09.057338+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:05:09.220701+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n..{\"timestamp\": \"2026-10-19T16:05:09.242806+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n....{\"timestamp\": \"2026-10-19T16:05:09.377208+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T16:05:09.380862+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T16:05:09.413101+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n..........................{\"timestamp\": \"2026-10-19T16:05:09.895412+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T16:05:09.907178+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T16:05:09.957295+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T16:05:09.969181+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n........{\"timestamp\": \"2026-10-19T16:05:10.105131+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.105514+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.105839+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.106149+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.106485+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.106785+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.107081+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.107393+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.107853+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.108212+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.108528+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.108829+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.109149+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.109456+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.109752+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.110042+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.110356+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.110645+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.110931+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.111223+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.111530+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.111818+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.112104+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.112392+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.112716+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.113014+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.113316+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T16:05:10.113608+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n.{\"timestamp\": \"2026-10-19T16:05:10.125805+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 400}\n...{\"timestamp\": \"2026-10-19T16:05:10.184688+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n......................{\"timestamp\": \"2026-10-19T16:05:10.962896+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T16:05:11.542123+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T16:05:12.079254+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.\n----------------------------------------------------------------------\nRan 106 tests in 5.302s\n\nOK\nDestroying test database for alias 'default'...\n\n",
+      "status": "passed",
+      "testCount": 106
+    },
+    {
+      "name": "production-check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "System check identified some issues:\n\nWARNINGS:\n?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.\n?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.\n\nSystem check identified 2 issues (1 silenced).\n",
+      "status": "passed_with_warnings"
+    },
+    {
+      "name": "production-static-admin-readiness-smoke",
+      "exitCode": 0,
+      "stdout": "PASS: production WhiteNoise CSS, HTTPS forwarding, Admin login and real PostgreSQL readiness\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "name": "gunicorn-native-platform-check",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\__main__.py\", line 5, in <module>\n    from gunicorn.app.wsgiapp import run\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\app\\wsgiapp.py\", line 8, in <module>\n    from gunicorn.app.base import Application\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\app\\base.py\", line 10, in <module>\n    from gunicorn import util\n  File \"C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Lib\\site-packages\\gunicorn\\util.py\", line 7, in <module>\n    import fcntl\nModuleNotFoundError: No module named 'fcntl'\n",
+      "status": "unsupported_platform_pending_linux"
+    },
+    {
+      "name": "stop-isolated-postgres",
+      "exitCode": 0,
+      "stdout": "esperando que el servidor se detenga.... listo\nservidor detenido\n",
+      "stderr": "",
+      "status": "passed"
+    }
+  ],
+  "finishedAt": "2026-10-19T16:05:15.130564+00:00",
+  "result": "passed_with_linux_gunicorn_pending",
+  "pending": [
+    "Gunicorn runtime on Linux: native Windows lacks fcntl; Ubuntu WSL could not mount its disk.",
+    "security.W004: HSTS remains disabled until HTTPS/domain validation.",
+    "security.W008: HTTPS redirect delegated to Render proxy; verify at deployment.",
+    "Real Render environment, migrations and final CORS/CSRF domains have not been exercised."
+  ],
+  "intentionalMailCheckException": "mail.E001 only in production: mail delivery intentionally disabled via dummy backend; no email workflows in project.",
+  "versions": {
+    "python": "3.14.3",
+    "django": "6.1.2",
+    "postgresql": "18.3",
+    "gunicorn": "26.2.0",
+    "whitenoise": "6.12.0"
+  },
+  "revision": "c05c3214cca5c354e38451f122bd21926a0a5bd0",
+  "sourceFileSha256": {
+    "requirements.txt": "6f79cbd8b819842e42bb004fbc5c5491ef522e1571ffa8c194942e4f9ae0599d",
+    "config/settings.py": "07ffd7e14ec751f2ecac641bf843d6ba1cbbba5da424a70d969da5ec8d3fb1b2",
+    "portfolio/test_deployment.py": "8a49361878013ffff1b749ee5dbf19d48e8e2db6b68a9e7d64f72da0d8e22d78"
+  },
+  "temporaryCluster": "stopped; generated artifacts retained under ignored reports/deploy-check-20261019T160252Z/"
+}

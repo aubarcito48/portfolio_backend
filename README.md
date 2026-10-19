@@ -10,7 +10,76 @@ aplicación inicial es `portfolio`.
 - django-cors-headers 4.9.0
 - PostgreSQL 18.3
 - Psycopg 3.3.6 (`psycopg[binary]`)
+- Gunicorn 26.2.0 (servidor de producción para Linux/Unix)
+- WhiteNoise 6.12.0 (estáticos del Admin)
 - Dependencias exactas: [`requirements.txt`](./requirements.txt)
+
+## Despliegue en Render
+
+Crear un Web Service Python conectado a este repositorio. `manage.py` está
+en la raíz; **Root Directory se deja vacío**.
+
+| Campo | Valor |
+| --- | --- |
+| Build Command | `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput` |
+| Start Command | `python -m gunicorn config.wsgi:application --bind 0.0.0.0:$PORT` |
+| Health Check Path | `/health/` |
+| Python | `PYTHON_VERSION=3.14.3`, versión usada en la validación local |
+
+Si el plan ofrece Pre-Deploy Command, mover allí `python manage.py migrate
+--noinput` y quitarlo del build. Las migraciones deben aplicarse una vez por
+despliegue, sin ejecutar tests sobre la base de producción.
+
+Configurar en Render `DJANGO_ENVIRONMENT=production`, `DJANGO_DEBUG=False`, una
+`DJANGO_SECRET_KEY` nueva y persistente, y `DJANGO_ALLOWED_HOSTS` con el hostname
+real sin esquema ni rutas. Para PostgreSQL se requieren `POSTGRES_DB`,
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` interno y
+`POSTGRES_PORT=5432`; el código no interpreta `DATABASE_URL`. Cargar los valores
+en Render sin versionarlos ni compartirlos. Servicio y base deben estar en la
+misma región para usar la conexión interna.
+
+`DJANGO_CORS_ALLOWED_ORIGINS` debe contener el origen HTTPS exacto del frontend.
+El Admin utiliza CSRF; configurar `DJANGO_CSRF_TRUSTED_ORIGINS` con sus orígenes
+HTTPS exactos cuando corresponda. El frontend en otro dominio requiere además
+su propia URL absoluta de API o un rewrite; CORS no cambia esa URL.
+
+WhiteNoise se ejecuta inmediatamente después de `SecurityMiddleware` y sirve
+los estáticos recolectados en `STATIC_ROOT=BASE_DIR / 'staticfiles'` bajo
+`/static/`. No hace falta configurar otro servicio para el CSS/JS del Admin.
+En producción se reconoce `X-Forwarded-Proto` del proxy de Render y las cookies
+de sesión y CSRF se marcan `Secure`; estas opciones no se activan en desarrollo
+ni en tests. La confianza en esa cabecera requiere mantener el proxy confiable.
+
+El proyecto no tiene envío de correo, recuperación de contraseña por email ni
+formularios de contacto que envíen mensajes. En producción `MAILERS` usa el
+backend `dummy`: descarta mensajes sin red ni salida a consola. No se configura
+SMTP ni un proveedor. Django considera ese backend no apto para envío real y
+emite `mail.E001`; se exceptúa **solo ese chequeo, solo en producción**, porque
+el envío está deshabilitado intencionalmente. El resto de los chequeos sigue
+activo. Desarrollo conserva el backend de consola. Si se incorpora email en
+el futuro, reemplazar esa configuración y retirar la excepción.
+
+Validación realizada: dependencias, `check`, `collectstatic` (130 archivos),
+ausencia de migraciones pendientes y 106 tests sobre un clúster PostgreSQL
+temporal con configuración sintética y carga de `.env` desactivada.
+Con `DEBUG=False` se verificaron `/static/admin/css/base.css`, login del Admin,
+HTTPS por cabecera y `/health/` contra PostgreSQL real.
+
+Pendientes antes de dar por verificado el despliegue:
+
+- Arrancar Gunicorn en Linux y consultar Admin, estáticos y health. Windows
+  carece de `fcntl`; el WSL local tampoco pudo iniciarse. La instalación del
+  paquete y el smoke WSGI pasan, pero no sustituyen esa prueba en Linux.
+- `check --deploy` conserva `security.W004` (HSTS no habilitado) y
+  `security.W008` (redirección HTTPS delegada al proxy). Confirmar la
+  redirección de Render; decidir HSTS cuando el dominio HTTPS esté validado.
+  Esas advertencias no se silencian ni se activa HSTS automáticamente.
+- Cargar las variables reales, ejecutar las migraciones en Render y comprobar
+  CORS/CSRF con los dominios definitivos. No se ha desplegado ni conectado a
+  una base de Render durante esta preparación.
+
+Evidencia: [`reports/render-deployment-validation.json`](reports/render-deployment-validation.json).
+No se leyó ni modificó el archivo `.env` para estas verificaciones.
 
 ## Instalación local (Windows / PowerShell)
 
