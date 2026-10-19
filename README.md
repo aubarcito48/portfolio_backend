@@ -119,8 +119,35 @@ un perfil publicado, responde HTTP 404:
 
 ## API
 
-El endpoint de perfil permite consulta únicamente mediante `GET`; los demás
-métodos responden HTTP 405.
+Los endpoints de consulta permiten únicamente `GET`; los demás métodos
+responden HTTP 405.
+
+### Tecnologías
+
+`GET /api/v1/tecnologias/` devuelve HTTP 200 y una lista de grupos compatible
+con `technologyGroups` del frontend. Cada grupo incluye el nombre de categoría
+y tecnologías con su nombre y enlace de documentación:
+
+```json
+[
+  {
+    "name": "Frontend",
+    "technologies": [
+      {
+        "name": "JavaScript",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+      }
+    ]
+  }
+]
+```
+
+Solo se incluyen tecnologías publicadas. Los grupos aparecen en el orden de su
+primera tecnología publicada; dentro de cada grupo, las tecnologías se ordenan
+por `order` ascendente y luego por ID ascendente. Si no hay tecnologías
+publicadas, el endpoint devuelve HTTP 200 con `[]`. La migración inicial carga
+las tecnologías que muestra actualmente el frontend, y pueden administrarse
+en Django Admin.
 
 ## Relación con el frontend
 
@@ -134,8 +161,6 @@ El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
 - `focus-chill.data.ts`: configuración de reproducción con `enabled`,
   `spotifyUrl`, `iframeTitle` y `autoplay`.
 
-La aplicación `portfolio` es el lugar para construir esos recursos en Django.
-Cuando se exponga la API, conviene mantener una respuesta JSON compatible con
-esas formas y nombres para que el frontend pueda consumirla sin cambios
-innecesarios. En esta tarea no se modificó el frontend ni se definieron modelos
-o endpoints antes de acordar el contrato de la API.
+La API de perfil y tecnologías mantiene los nombres públicos que consume el
+frontend. Las demás secciones se incorporarán en tareas siguientes; en TK04 y
+TK05 no se modificó el frontend.

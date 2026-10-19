@@ -45,3 +45,30 @@ class Perfil(models.Model):
             'location': self.location,
             'photo': self.image_url,
         }
+
+
+class Tecnologia(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=100)
+    url = models.URLField(max_length=500)
+    order = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('order', 'id')
+        constraints = [
+            models.UniqueConstraint(
+                models.functions.Lower('name'),
+                models.functions.Lower('category'),
+                name='portfolio_technology_unique_name_category',
+            ),
+        ]
+        verbose_name = 'tecnología'
+        verbose_name_plural = 'tecnologías'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name} ({self.category})'

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .models import Perfil
+from .models import Perfil, Tecnologia
 
 
 @require_GET
@@ -15,3 +15,23 @@ def perfil_publico(request):
         )
 
     return JsonResponse(perfil.to_public_dict())
+
+
+@require_GET
+def tecnologias_publicas(request):
+    groups = []
+    group_by_category = {}
+
+    for tecnologia in Tecnologia.objects.filter(is_published=True).order_by(
+        'order', 'id'
+    ):
+        group = group_by_category.get(tecnologia.category)
+        if group is None:
+            group = {'name': tecnologia.category, 'technologies': []}
+            group_by_category[tecnologia.category] = group
+            groups.append(group)
+        group['technologies'].append(
+            {'name': tecnologia.name, 'url': tecnologia.url}
+        )
+
+    return JsonResponse(groups, safe=False)
