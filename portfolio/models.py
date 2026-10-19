@@ -282,11 +282,13 @@ class Proyecto(models.Model):
         return self.title
 
     def to_public_dict(self):
-        technologies = getattr(
-            self,
-            'published_technologies',
-            self.technologies.filter(is_published=True).order_by('order', 'id'),
-        )
+        # getattr's default is evaluated eagerly, even when prefetch supplied
+        # the data. Build the fallback queryset only for standalone instances.
+        technologies = getattr(self, 'published_technologies', None)
+        if technologies is None:
+            technologies = self.technologies.filter(is_published=True).order_by(
+                'order', 'id'
+            )
         links = []
         if self.demo_url:
             links.append({'label': self.demo_label, 'url': self.demo_url})

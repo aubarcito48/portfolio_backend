@@ -159,6 +159,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# All managed backend logs use a fixed schema. Raw messages, exception text,
+# request objects, SQL, headers and traceback locals never enter the output.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {'safe_json': {'()': 'config.safe_logging.SafeJsonFormatter'}},
+    'handlers': {
+        'safe_console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'safe_json',
+            'stream': 'ext://sys.stderr',
+        },
+    },
+    'root': {'handlers': ['safe_console'], 'level': 'WARNING'},
+    'loggers': {
+        'django': {'handlers': ['safe_console'], 'level': 'WARNING', 'propagate': False},
+        'django.server': {'handlers': ['safe_console'], 'level': 'INFO', 'propagate': False},
+        'django.db.backends': {'handlers': ['safe_console'], 'level': 'ERROR', 'propagate': False},
+        'portfolio.health': {'handlers': ['safe_console'], 'level': 'ERROR', 'propagate': False},
+    },
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
@@ -171,6 +193,8 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        # Bound connection establishment so readiness can report an outage.
+        'OPTIONS': {'connect_timeout': 3},
         'TEST': {
             'NAME': os.getenv(
                 'POSTGRES_TEST_DB',

@@ -167,6 +167,140 @@ npx playwright show-trace <ruta-al-trace.zip>
 El estado y los defectos de la ejecución de cierre están en
 [`reports/BE-CP22.md`](reports/BE-CP22.md).
 
+## Rendimiento y consultas — TK16 / BE-CP23
+
+Con PostgreSQL y `.env` configurados, desde `portfolio_backend`:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\measure_performance.py --label after --run-tests
+```
+
+Requiere `CREATEDB` y el puerto local 8765 libre. No necesita frontend ni
+servicios externos. El runner crea una base PostgreSQL aleatoria y descartable,
+aplica migraciones y carga 100 proyectos publicados y un borrador, cada uno
+con cinco tecnologías publicadas, una oculta y dos enlaces adicionales.
+También carga perfil, tecnologías, experiencias, formación y enlaces
+deterministas. La carga rechaza bases de desarrollo y nombres que no cumplen
+las guardas E2E; reemplaza contenido solamente en la base temporal creada.
+
+Mide por HTTP real los siete endpoints de contenido y, adicionalmente, el
+listado de 100 proyectos. Cada escenario recibe cinco peticiones de
+calentamiento y 50 medidas secuenciales; conserva duración, código HTTP,
+errores, tamaño y hash del contenido de cada respuesta. Calcula p95 con rango
+más cercano: posición `ceil(0.95 * 50)`, es decir, el valor 48 ordenado.
+La medición utiliza `DEBUG=False`, `runserver --noreload --nothreading`,
+loopback, concurrencia uno y conexiones HTTP nuevas, sin caché de respuestas.
+Se mantiene la configuración PostgreSQL normal del proyecto, con conexiones
+Django no persistentes (`CONN_MAX_AGE=0`).
+
+El primer acceso a perfil se informa aparte: duración HTTP inicial y tiempo
+desde crear el proceso hasta recibir esa respuesta. La disponibilidad se
+comprueba por TCP sin consultar la API. Es un proceso Django nuevo, con
+PostgreSQL ya iniciado y los datos recién cargados; no representa un reinicio
+del sistema ni una caché de disco vacía. El objetivo provisional de 1000 ms
+se evalúa sobre el p95 caliente, no sobre el inicio del proceso.
+
+Las consultas SQL se capturan en otra etapa mediante el cliente Django,
+tres veces por escenario y con conexión ya inicializada. No se instrumentan
+las peticiones HTTP usadas para calcular latencias. El listado de proyectos
+debe conservar cuatro consultas al pasar de 1 a 20 o 100 elementos; el detalle
+usa tres. Las pruebas de presupuesto de consultas verifican esto junto con
+contenido, orden, paginación y exclusión de borradores. La suite completa
+mantiene las comprobaciones de permisos y validaciones.
+
+`--run-tests` ejecuta la regresión al terminar las mediciones, en otra base
+aleatoria independiente. El resultado es un JSON histórico en
+`reports/TK16-<fechaUTC>-after.json`, con muestras, p95, SQL, versiones, commit,
+hashes de fuentes y salidas de ejecución. Su carpeta del mismo nombre guarda
+los logs y la captura SQL; los datos esenciales también están en el JSON
+versionable. Al terminar se elimina únicamente la base temporal creada.
+
+Para comparar dos ejecuciones con los mismos datos y condiciones:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\measure_performance.py --label after --compare reports\TK16-<fechaUTC>-before.json --run-tests
+```
+
+Las etiquetas `before`/`after` identifican versiones medidas; no cambian el
+código automáticamente. La comparación verifica condiciones, contenido y
+consultas. Si un p95 supera 1000 ms o hay errores, el runner conserva la
+evidencia y termina con código distinto de cero. La interpretación, hardware,
+resultados de cierre y pasos para repetir la versión anterior están en
+[`reports/BE-CP23.md`](reports/BE-CP23.md).
+
+## Disponibilidad y logs seguros — TK17 / BE-CP24
+
+`GET /health/` no requiere autenticación y ejecuta exactamente `SELECT 1`
+contra la conexión PostgreSQL configurada. No lee tablas del portfolio ni
+modifica datos; puede utilizarse antes de aplicar migraciones.
+
+| Condición | HTTP | JSON |
+| --- | --- | --- |
+| PostgreSQL responde correctamente | 200 | `{"status":"ok"}` |
+| Error de conexión, de consulta o resultado inesperado | 503 | `{"status":"unavailable"}` |
+
+Las respuestas incluyen `Cache-Control` con `no-store` y no incluyen nombres
+de usuario, servidores, credenciales ni trazas. `HEAD` hace la misma comprobación
+y devuelve el mismo código sin cuerpo. `OPTIONS` solo informa los métodos y
+devuelve 204 sin consultar PostgreSQL; los monitores deben usar `GET`.
+Los métodos de escritura se rechazan. La apertura de conexiones PostgreSQL
+tiene `connect_timeout=3` segundos; este límite corresponde al establecimiento
+de conexión, no a un timeout global de cualquier consulta o petición.
+
+Consulta local:
+
+```powershell
+curl.exe -i http://127.0.0.1:8000/health/
+```
+
+Los logs de Python se envían a stderr como JSON. Conservan fecha UTC, nivel,
+componente, evento, código HTTP y una categoría de error permitida cuando
+está disponible. Por ejemplo, una caída de PostgreSQL registra
+`component=health`, `event=database_unavailable`, `errorType=OperationalError`
+y `statusCode=503`. Django también puede registrar un evento HTTP de ese 503.
+
+El formateador utiliza una lista de campos permitidos: nunca serializa el
+mensaje libre, argumentos, texto de excepciones, traceback, SQL, objetos de
+solicitud ni campos adicionales arbitrarios. Así se excluyen cuerpos privados,
+cookies, cabeceras de autorización, tokens, query strings y credenciales,
+incluso si llegan dentro de una excepción. Las excepciones desconocidas usan
+`UnexpectedError`, sin exponer el nombre de una clase arbitraria.
+Los loggers de Django y la aplicación usan este formato; se reemplazan los
+handlers por defecto de Django, incluido el envío de excepciones por correo.
+La configuración no controla los logs independientes de un proxy o servidor
+externo. En producción debe mantenerse `DJANGO_DEBUG=False`, como exige la
+configuración del proyecto.
+
+Para conservar y consultar stderr del servidor local:
+
+```powershell
+New-Item -ItemType Directory -Force reports\local
+python manage.py runserver --noreload 2> reports\local\backend.log
+# En otra terminal:
+Get-Content reports\local\backend.log -Wait
+```
+
+Para repetir la evidencia completa:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\validate_readiness.py
+```
+
+Requiere `.env`, PostgreSQL con `CREATEDB` y el puerto 8766 libre. Crea una
+base temporal, consulta el endpoint por HTTP y repite el acceso con un proceso
+de prueba que apunta a un puerto PostgreSQL local sin servicio. Comprueba
+200 → 503 → 200 al restaurar la configuración; no detiene PostgreSQL ni cambia
+las credenciales reales. Los tokens y cookies inyectados son marcadores
+sintéticos cuya ausencia en respuestas y logs se verifica automáticamente.
+Después ejecuta toda la suite Django en otra base aleatoria y elimina su
+base temporal. El servidor WSGI del runner es exclusivamente de prueba y
+no registra URLs crudas mediante el access logger de la biblioteca estándar.
+
+El JSON `reports/TK17-readiness-<fechaUTC>.json` conserva respuestas, logs
+seguros, versiones, commit base, hashes de las fuentes, resultado y salida
+de tests. Los logs de cada fase quedan en `reports/TK17-<fechaUTC>/`.
+Estado y evidencias: [`reports/BE-CP24.md`](reports/BE-CP24.md).
+
 ## Carga inicial de datos
 
 Con las migraciones aplicadas, cargá o actualizá el contenido inicial aprobado

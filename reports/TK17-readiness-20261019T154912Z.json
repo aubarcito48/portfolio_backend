@@ -1,0 +1,130 @@
+{
+  "task": "TK17",
+  "case": "BE-CP24",
+  "startedAt": "2026-10-19T15:49:12.374850+00:00",
+  "revision": {
+    "commit": "c64ae6ad0a8dca1ac43cb1ad8701909c240c2e6f",
+    "workingTreeDirty": true,
+    "sourceFileSha256": {
+      ".env.example": "c8ca48b5193852cc876dfc91df37534d1e0d3da95c9a1ecab15d8cfd206bc5da",
+      ".gitignore": "fa4e7de72a64c9718d4a727ac66af53070a14c2d626da1e3d6377e0062d45fb9",
+      "README.md": "0e37c4efb05f2ed325860527c970184d2a8baf5a1891b78ab827c6544c8aa346",
+      "config/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "config/asgi.py": "0c12278ddb5f3c2caad33235b9ef83796c68377e26e7d60fb0c7b17217bfbb9b",
+      "config/safe_logging.py": "4d692a8c2f45acb7009bb335760d2cae89c4431219c9c68fb075926404395877",
+      "config/settings.py": "e34dda3f5546b532c02d0cf5bf6a4de44889b81d496c04fc2416ca93a2aad633",
+      "config/urls.py": "5e8c1935d45c773f760aa4daa7622e2af647ccb30cc9f2c32f2211c129db4fb2",
+      "config/wsgi.py": "42acf666fd373bd137b0c51bfa95498501a08547f9aaedc56e2bf281d32bb86f",
+      "manage.py": "b30eeb4890cb6f315cc238313808f636db29e9906b61cc6f6051567156a0097b",
+      "portfolio/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "portfolio/admin.py": "fed38f9622ad6d6a1fce1583e742addbd1d462931d2ee6c4264377fffc17261a",
+      "portfolio/apps.py": "f48ebc1567731c8db3f93b83b38a636b16aca6073b5423a9e3ce4371e4f1e8a3",
+      "portfolio/health.py": "b95ba80e417ffd39df14c47e2f0d0cd0e3b9bf4472bbbe3c3f36b4e10b46384a",
+      "portfolio/management/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "portfolio/management/commands/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "portfolio/management/commands/load_portfolio_data.py": "5e6a8ae65ec50f37bfe06355d93c312a864d1d84466d51bafc34188efae966ed",
+      "portfolio/management/commands/load_portfolio_e2e_data.py": "cfc45114949af92943e016909a303a3ed49ab1b84aaec63bf60c09e96efddb55",
+      "portfolio/management/commands/load_portfolio_performance_data.py": "6cb35a1b94944e459e6562e1444b5bc2fc6f40603b942a4e2d4d972b019afb52",
+      "portfolio/management/commands/profile_api_queries.py": "0c64ffc630b7546deaa5a5d74a9655a4cfe5530b94416137337ca2f1c38bb734",
+      "portfolio/migrations/0001_initial.py": "9bdae8b267d85b7e1bf114123b635ef15946063ced9dd6560dc0900f2b2e8e01",
+      "portfolio/migrations/0002_initial_profile.py": "658af8e9bf72fb2c3b248e57ac3d7adad168c527ef27e37929e19a7605c0ca1d",
+      "portfolio/migrations/0003_tecnologia.py": "7e184018a878fa3444f247ad5278f0bf75adb7a7fea05236004b58801790febd",
+      "portfolio/migrations/0004_initial_technologies.py": "59b934481a78176184d30225400e3846d77a1a1d79e1d10527ebd5712f02ed20",
+      "portfolio/migrations/0005_experiencia.py": "a026ac5a11eef2643a5fe3efc33ad7a603d2168aa785454c87301b54338f5bdc",
+      "portfolio/migrations/0006_formacion.py": "ec62e77a5d9702f415244023a11266b75cb2f50325bad744485fe814894aa87f",
+      "portfolio/migrations/0007_proyecto_enlaceproyecto.py": "222a7926f58154dcb7d808f97f7a3bf3e904b5acab6dd95ce7f3109b145086a1",
+      "portfolio/migrations/0008_initial_projects.py": "f05e889b14c665b8047fa40e136985ec2bd7bf76048e910b74698d97bf133e1a",
+      "portfolio/migrations/0009_enlace.py": "8ceaef83a013450f7b078878c83efca1c78bce4bb40bcc4ef5492db6ca9ebd70",
+      "portfolio/migrations/0010_content_editors.py": "7be76425c84b3f9c6a6aa1c537c6fa8b0d96ae87a24b4e7c22e25aec190b1f2b",
+      "portfolio/migrations/0011_alter_enlace_url_alter_enlaceproyecto_url_and_more.py": "be3896789f57f838d4282492b4bc66bbc0763027663f55f5a2ded83e760e0740",
+      "portfolio/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "portfolio/models.py": "53a0e5f375684f051b67bbe46493f9624376d0c44cd4239f114e04fc0db6ebb7",
+      "portfolio/test_health.py": "02b8361c648d0a8f5808cafe32321d5b93d8d4c57c0eba361aeb4e4e9180e6b7",
+      "portfolio/test_performance.py": "5720dd90f3a9662daa42d287d0881aa991612efd2e126dc5f415377117eb09cd",
+      "portfolio/test_regression.py": "7475e9d56b52008b129acf8eb7c34499a1f71159ac777d4c2b2156b773d0b093",
+      "portfolio/tests.py": "d066894b6b29419990b5f0b9c336faff8584e2a5ec9b09056fad54624cb56a23",
+      "portfolio/urls.py": "983d486bdfc89eddc2809125e06d8e2761f977228d5d26405e2605caacccd3ff",
+      "portfolio/views.py": "fcc25647a4f5bccaca96e9ee8af06d2c638ae293fe170423742daf8f0bfef6e1",
+      "requirements.txt": "8e692afd11f8f48ae5b31cc3e1e63196298f584f75502165b148df72f209b78a",
+      "scripts/measure_performance.py": "6513de5c6c784460dc180fd139b59b41d0223e41af94e6c62dd357aad6c987f5",
+      "scripts/probe_integrated.py": "cb173e40cd57f4fe26d31d24012097a5eccc575226955e51cfcf97ad5063f5b9",
+      "scripts/run_regression.py": "240e34e10b20915496820ee6482efe4a0bbf0d65b03afe5fe74e2ff404fddfa7",
+      "scripts/validate_readiness.py": "7aa9c40f13c73ef881dc612b1e0c5f1f9bcc5b257ce220cb65b172e6287ee33e"
+    }
+  },
+  "result": "passed",
+  "steps": [
+    {
+      "name": "backend-postgresql-regression",
+      "command": [
+        "C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Scripts\\python.exe",
+        "manage.py",
+        "test",
+        "--noinput"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 7.02,
+      "stdout": "Found 101 test(s).\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default'...\n\n...{\"timestamp\": \"2026-10-19T15:49:20.960491+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T15:49:21.218045+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n...{\"timestamp\": \"2026-10-19T15:49:21.338830+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T15:49:21.339695+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T15:49:21.340477+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..............{\"timestamp\": \"2026-10-19T15:49:21.753788+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T15:49:21.754965+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T15:49:21.755865+00:00\", \"level\": \"WARNING\", \"component\": \"security\", \"event\": \"security_error\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T15:49:21.862066+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n{\"timestamp\": \"2026-10-19T15:49:21.924960+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T15:49:21.974058+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T15:49:22.133405+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n..{\"timestamp\": \"2026-10-19T15:49:22.147521+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n....{\"timestamp\": \"2026-10-19T15:49:22.223693+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n{\"timestamp\": \"2026-10-19T15:49:22.227092+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"errorType\": \"UnexpectedError\", \"statusCode\": 403}\n.{\"timestamp\": \"2026-10-19T15:49:22.255380+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n..........................{\"timestamp\": \"2026-10-19T15:49:22.734947+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T15:49:22.741491+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T15:49:22.795545+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.{\"timestamp\": \"2026-10-19T15:49:22.800266+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n........{\"timestamp\": \"2026-10-19T15:49:22.897584+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.897975+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.898303+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.898615+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.898950+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.899256+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.899569+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.899863+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.900178+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.900484+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.900780+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.901068+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.901378+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.901785+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.902118+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.902422+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.902743+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.903054+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.903379+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.903701+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.904033+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.904332+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.904646+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.904937+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.905262+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.905570+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.905869+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n{\"timestamp\": \"2026-10-19T15:49:22.906161+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 405}\n.{\"timestamp\": \"2026-10-19T15:49:22.910935+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 400}\n...{\"timestamp\": \"2026-10-19T15:49:22.938096+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.................{\"timestamp\": \"2026-10-19T15:49:23.664655+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n..{\"timestamp\": \"2026-10-19T15:49:23.906874+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n....{\"timestamp\": \"2026-10-19T15:49:24.420319+00:00\", \"level\": \"WARNING\", \"component\": \"http\", \"event\": \"request_error\", \"statusCode\": 404}\n.\n----------------------------------------------------------------------\nRan 101 tests in 4.741s\n\nOK\nDestroying test database for alias 'default'...\n\n",
+      "testCount": 101
+    }
+  ],
+  "environment": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python": "3.14.3",
+    "debug": false,
+    "server": "stdlib WSGI, loopback only; raw access logs disabled",
+    "django": "6.1.2",
+    "postgresql": "18.3"
+  },
+  "evidenceDirectory": "reports\\TK17-20261019T154912Z",
+  "probes": [
+    {
+      "phase": "available",
+      "status": 200,
+      "json": {
+        "status": "ok"
+      },
+      "cacheControl": "max-age=0, no-cache, no-store, must-revalidate, private",
+      "safeLogs": []
+    },
+    {
+      "phase": "unavailable",
+      "status": 503,
+      "json": {
+        "status": "unavailable"
+      },
+      "cacheControl": "max-age=0, no-cache, no-store, must-revalidate, private",
+      "safeLogs": [
+        {
+          "timestamp": "2026-10-19T15:49:17.399985+00:00",
+          "level": "ERROR",
+          "component": "health",
+          "event": "database_unavailable",
+          "errorType": "OperationalError",
+          "statusCode": 503
+        },
+        {
+          "timestamp": "2026-10-19T15:49:17.402307+00:00",
+          "level": "ERROR",
+          "component": "http",
+          "event": "request_error",
+          "statusCode": 503
+        }
+      ]
+    },
+    {
+      "phase": "recovered",
+      "status": 200,
+      "json": {
+        "status": "ok"
+      },
+      "cacheControl": "max-age=0, no-cache, no-store, must-revalidate, private",
+      "safeLogs": []
+    }
+  ],
+  "temporaryDatabase": "portfolio_e2e_34041e871ed1",
+  "validationTestDatabase": "portfolio_suite_b599cf133b5c",
+  "databaseCleanedUp": true,
+  "finishedAt": "2026-10-19T15:49:25.404018+00:00"
+}
