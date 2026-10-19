@@ -5,11 +5,12 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import IntegrityError, connection, transaction
 from django.urls import reverse
-from django.test import TestCase, TransactionTestCase, override_settings
+from django.test import Client, TestCase, TransactionTestCase, override_settings
 
 from .models import (
     Enlace,
@@ -38,7 +39,7 @@ class PostgreSQLPersistenceTests(TransactionTestCase):
     @override_settings(CORS_ALLOWED_ORIGINS=['http://localhost:4200'])
     def test_allows_local_angular_origin(self):
         response = self.client.get(
-            '/admin/login/',
+            '/api/v1/perfil/',
             HTTP_ORIGIN='http://localhost:4200',
         )
 
@@ -46,15 +47,82 @@ class PostgreSQLPersistenceTests(TransactionTestCase):
             response.headers.get('Access-Control-Allow-Origin'),
             'http://localhost:4200',
         )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
 
     @override_settings(CORS_ALLOWED_ORIGINS=['http://localhost:4200'])
     def test_rejects_unconfigured_origin(self):
         response = self.client.get(
-            '/admin/login/',
+            '/api/v1/perfil/',
             HTTP_ORIGIN='http://malicious.example',
         )
 
         self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    @override_settings(
+        CORS_ALLOWED_ORIGINS=['http://localhost:4200'],
+        CORS_ALLOW_CREDENTIALS=False,
+        CORS_ALLOW_METHODS=('GET', 'HEAD', 'OPTIONS'),
+    )
+    def test_cors_preflight_limits_methods_and_does_not_allow_credentials(self):
+        response = self.client.options(
+            '/api/v1/perfil/',
+            HTTP_ORIGIN='http://localhost:4200',
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD='POST',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Origin'),
+            'http://localhost:4200',
+        )
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Methods'),
+            'GET, HEAD, OPTIONS',
+        )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
+
+    @override_settings(
+        CORS_ALLOWED_ORIGINS=['http://localhost:4200'],
+        CORS_ALLOW_CREDENTIALS=False,
+    )
+    def test_public_api_does_not_require_a_session_or_token(self):
+        response = self.client.get(
+            '/api/v1/tecnologias/',
+            HTTP_ORIGIN='http://localhost:4200',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Origin'),
+            'http://localhost:4200',
+        )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
+
+    @override_settings(CSRF_TRUSTED_ORIGINS=['https://admin.example.com'])
+    def test_csrf_trust_does_not_grant_cors_access(self):
+        response = self.client.get(
+            '/api/v1/perfil/',
+            HTTP_ORIGIN='https://admin.example.com',
+        )
+
+        self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    def test_origin_configuration_rejects_wildcards_and_paths(self):
+        from config.settings import parse_trusted_origins
+
+        for value in (
+            'https://*.example.com',
+            'https://example.com/admin',
+            'ftp://example.com',
+            'https://user:password@example.com',
+        ):
+            with self.subTest(value=value):
+                with patch.dict(
+                    'os.environ',
+                    {'TEST_TRUSTED_ORIGINS': value},
+                ):
+                    with self.assertRaises(ImproperlyConfigured):
+                        parse_trusted_origins('TEST_TRUSTED_ORIGINS')
 
 
 class PerfilApiTests(TestCase):
@@ -1783,6 +1851,56 @@ class DjangoAdminPermissionTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Enlace.objects.filter(pk=link.pk).exists())
+
+    @override_settings(CSRF_TRUSTED_ORIGINS=['https://admin.example.com'])
+    def test_csrf_is_required_for_admin_post_and_valid_token_allows_save(self):
+        link = Enlace.objects.get(type='github')
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.editor)
+        change_url = reverse(
+            'admin:portfolio_enlace_change',
+            args=(link.pk,),
+        )
+        form_data = {
+            'label': 'GitHub actualizado con CSRF',
+            'type': link.type,
+            'url': link.url,
+            'order': link.order,
+            'is_published': 'on',
+        }
+
+        form_response = csrf_client.get(change_url)
+        self.assertEqual(form_response.status_code, 200)
+        csrf_token = csrf_client.cookies['csrftoken'].value
+
+        missing_token_response = csrf_client.post(change_url, form_data)
+        invalid_token_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN='invalid-token',
+        )
+        untrusted_origin_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN=csrf_token,
+            HTTP_ORIGIN='https://untrusted.example.com',
+        )
+        link.refresh_from_db()
+        self.assertEqual(missing_token_response.status_code, 403)
+        self.assertEqual(invalid_token_response.status_code, 403)
+        self.assertEqual(untrusted_origin_response.status_code, 403)
+        self.assertEqual(link.label, 'GitHub')
+
+        valid_token_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN=csrf_token,
+            HTTP_ORIGIN='https://admin.example.com',
+        )
+
+        self.assertEqual(valid_token_response.status_code, 302)
+        link.refresh_from_db()
+        self.assertEqual(link.label, 'GitHub actualizado con CSRF')
 
     def test_superuser_can_delete_when_authorized(self):
         superuser = get_user_model().objects.create_superuser(

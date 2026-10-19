@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -69,14 +70,50 @@ elif not allowed_hosts and ENVIRONMENT == 'test':
 
 ALLOWED_HOSTS = allowed_hosts
 
-CORS_ALLOWED_ORIGINS = [
-    origin.strip().rstrip('/')
-    for origin in os.getenv(
-        'DJANGO_CORS_ALLOWED_ORIGINS',
-        'http://localhost:4200' if ENVIRONMENT == 'development' else '',
-    ).split(',')
-    if origin.strip()
-]
+
+def parse_trusted_origins(variable_name, default=''):
+    configured_origins = os.getenv(variable_name, default)
+    origins = []
+    for configured_origin in configured_origins.split(','):
+        origin = configured_origin.strip().rstrip('/')
+        if not origin:
+            continue
+        parsed_origin = urlsplit(origin)
+        try:
+            valid_host = bool(parsed_origin.hostname) and (
+                parsed_origin.port is None
+                or 1 <= parsed_origin.port <= 65535
+            )
+        except ValueError:
+            valid_host = False
+        if (
+            parsed_origin.scheme not in {'http', 'https'}
+            or not valid_host
+            or parsed_origin.username is not None
+            or parsed_origin.password is not None
+            or parsed_origin.path
+            or parsed_origin.query
+            or parsed_origin.fragment
+            or '*' in origin
+        ):
+            raise ImproperlyConfigured(
+                f'{variable_name} debe contener orígenes HTTP/HTTPS exactos '
+                'sin rutas, comodines ni credenciales.'
+            )
+        origins.append(origin)
+    return origins
+
+
+CORS_ALLOWED_ORIGINS = parse_trusted_origins(
+    'DJANGO_CORS_ALLOWED_ORIGINS',
+    'http://localhost:4200' if ENVIRONMENT == 'development' else '',
+)
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_METHODS = ('GET', 'HEAD', 'OPTIONS')
+
+CSRF_TRUSTED_ORIGINS = parse_trusted_origins(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+)
 
 
 # Application definition

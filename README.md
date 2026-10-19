@@ -43,6 +43,7 @@ la clave ilustrativa `replace-with-...`.
 | `DJANGO_DEBUG` | `True` o `False`. Por defecto se activa solo en desarrollo; en producción debe ser `False`. |
 | `DJANGO_ALLOWED_HOSTS` | Hosts separados por coma. En producción es obligatorio y explícito. |
 | `DJANGO_CORS_ALLOWED_ORIGINS` | Orígenes web permitidos separados por coma. En desarrollo permite por defecto `http://localhost:4200`. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | Orígenes HTTP/HTTPS exactos confiables para CSRF, separados por coma. Por defecto: ninguno. |
 | `POSTGRES_DB` | Base PostgreSQL de desarrollo. Obligatoria. |
 | `POSTGRES_USER` | Usuario PostgreSQL. Obligatoria. |
 | `POSTGRES_PASSWORD` | Contraseña PostgreSQL. Obligatoria; no la guardes en Git. |
@@ -67,8 +68,22 @@ desactivado por defecto.
 La API permite CORS para el frontend Angular local en `http://localhost:4200`
 durante desarrollo. En otros entornos, definí explícitamente
 `DJANGO_CORS_ALLOWED_ORIGINS` con los orígenes confiables, incluyendo esquema y
-puerto (por ejemplo, `https://portfolio.example.com`). No se habilita acceso
-desde cualquier origen ni se activa el envío de credenciales por CORS.
+puerto (por ejemplo, `https://portfolio.example.com`). Solo se aceptan
+orígenes HTTP/HTTPS exactos, sin rutas ni comodines; el backend no permite
+credenciales CORS y limita los métodos anunciados a `GET`, `HEAD` y `OPTIONS`.
+Las consultas públicas no necesitan cookies, sesión ni token.
+
+La protección CSRF de Django permanece activa para el Admin y sus operaciones
+de sesión. `DJANGO_CSRF_TRUSTED_ORIGINS` es independiente de CORS y debe quedar
+vacía salvo que un Admin alojado en otro origen necesite enviar operaciones
+protegidas; en ese caso, enumerá únicamente su origen HTTPS exacto. Confiar un
+origen para CSRF no le concede permiso CORS, autenticación ni permisos de
+administración. CORS tampoco reemplaza la validación CSRF.
+
+El middleware `CorsMiddleware` se ejecuta antes de `CommonMiddleware`, mientras
+que `CsrfViewMiddleware` permanece habilitado en la cadena de middleware. El
+preflight CORS permitido devuelve HTTP 200 con sus cabeceras; `OPTIONS` directo
+de la API devuelve HTTP 204.
 
 ## Comprobaciones y servidor
 
