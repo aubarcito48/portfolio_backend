@@ -1,12 +1,16 @@
 from datetime import date
+from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.db import IntegrityError, connection, transaction
 from django.urls import reverse
-from django.test import TestCase, TransactionTestCase, override_settings
+from django.test import Client, TestCase, TransactionTestCase, override_settings
 
 from .models import (
     Enlace,
@@ -35,7 +39,7 @@ class PostgreSQLPersistenceTests(TransactionTestCase):
     @override_settings(CORS_ALLOWED_ORIGINS=['http://localhost:4200'])
     def test_allows_local_angular_origin(self):
         response = self.client.get(
-            '/admin/login/',
+            '/api/v1/perfil/',
             HTTP_ORIGIN='http://localhost:4200',
         )
 
@@ -43,15 +47,82 @@ class PostgreSQLPersistenceTests(TransactionTestCase):
             response.headers.get('Access-Control-Allow-Origin'),
             'http://localhost:4200',
         )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
 
     @override_settings(CORS_ALLOWED_ORIGINS=['http://localhost:4200'])
     def test_rejects_unconfigured_origin(self):
         response = self.client.get(
-            '/admin/login/',
+            '/api/v1/perfil/',
             HTTP_ORIGIN='http://malicious.example',
         )
 
         self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    @override_settings(
+        CORS_ALLOWED_ORIGINS=['http://localhost:4200'],
+        CORS_ALLOW_CREDENTIALS=False,
+        CORS_ALLOW_METHODS=('GET', 'HEAD', 'OPTIONS'),
+    )
+    def test_cors_preflight_limits_methods_and_does_not_allow_credentials(self):
+        response = self.client.options(
+            '/api/v1/perfil/',
+            HTTP_ORIGIN='http://localhost:4200',
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD='POST',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Origin'),
+            'http://localhost:4200',
+        )
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Methods'),
+            'GET, HEAD, OPTIONS',
+        )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
+
+    @override_settings(
+        CORS_ALLOWED_ORIGINS=['http://localhost:4200'],
+        CORS_ALLOW_CREDENTIALS=False,
+    )
+    def test_public_api_does_not_require_a_session_or_token(self):
+        response = self.client.get(
+            '/api/v1/tecnologias/',
+            HTTP_ORIGIN='http://localhost:4200',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Origin'),
+            'http://localhost:4200',
+        )
+        self.assertNotIn('Access-Control-Allow-Credentials', response.headers)
+
+    @override_settings(CSRF_TRUSTED_ORIGINS=['https://admin.example.com'])
+    def test_csrf_trust_does_not_grant_cors_access(self):
+        response = self.client.get(
+            '/api/v1/perfil/',
+            HTTP_ORIGIN='https://admin.example.com',
+        )
+
+        self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
+    def test_origin_configuration_rejects_wildcards_and_paths(self):
+        from config.settings import parse_trusted_origins
+
+        for value in (
+            'https://*.example.com',
+            'https://example.com/admin',
+            'ftp://example.com',
+            'https://user:password@example.com',
+        ):
+            with self.subTest(value=value):
+                with patch.dict(
+                    'os.environ',
+                    {'TEST_TRUSTED_ORIGINS': value},
+                ):
+                    with self.assertRaises(ImproperlyConfigured):
+                        parse_trusted_origins('TEST_TRUSTED_ORIGINS')
 
 
 class PerfilApiTests(TestCase):
@@ -175,7 +246,7 @@ class TecnologiaApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'name': 'Frontend',
@@ -213,7 +284,10 @@ class TecnologiaApiTests(TestCase):
         response = self.client.get('/api/v1/tecnologias/')
 
         self.assertEqual(
-            [item['name'] for item in response.json()[0]['technologies']],
+            [
+                item['name']
+                for item in response.json()['results'][0]['technologies']
+            ],
             [first.name, second.name],
         )
 
@@ -227,7 +301,8 @@ class TecnologiaApiTests(TestCase):
         response = self.client.get('/api/v1/tecnologias/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_duplicate_name_within_category_case_insensitively(self):
         self.create_tecnologia('Python', 'Backend')
@@ -302,7 +377,7 @@ class ExperienciaApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'title': 'Experiencia actual',
@@ -322,7 +397,7 @@ class ExperienciaApiTests(TestCase):
                 },
             ],
         )
-        self.assertIsNone(response.json()[0]['endDate'])
+        self.assertIsNone(response.json()['results'][0]['endDate'])
 
     def test_returns_empty_list_when_no_experiences_are_published(self):
         self.create_experiencia(
@@ -336,7 +411,8 @@ class ExperienciaApiTests(TestCase):
         response = self.client.get('/api/v1/experiencias/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_resolves_equal_order_using_ascending_id(self):
         first = self.create_experiencia(
@@ -357,7 +433,7 @@ class ExperienciaApiTests(TestCase):
         response = self.client.get('/api/v1/experiencias/')
 
         self.assertEqual(
-            [item['title'] for item in response.json()],
+            [item['title'] for item in response.json()['results']],
             [first.title, second.title],
         )
 
@@ -468,7 +544,7 @@ class FormacionApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {
                     'name': 'Junior Full Stack Developer',
@@ -490,7 +566,10 @@ class FormacionApiTests(TestCase):
                 },
             ],
         )
-        self.assertEqual(response.json()[0]['name'], certification.name)
+        self.assertEqual(
+            response.json()['results'][0]['name'],
+            certification.name,
+        )
 
     def test_returns_empty_list_when_no_education_is_published(self):
         self.create_formacion(
@@ -505,7 +584,8 @@ class FormacionApiTests(TestCase):
         response = self.client.get('/api/v1/formacion/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_resolves_equal_order_using_ascending_id(self):
         first = self.create_formacion(
@@ -528,7 +608,7 @@ class FormacionApiTests(TestCase):
         response = self.client.get('/api/v1/formacion/')
 
         self.assertEqual(
-            [item['name'] for item in response.json()],
+            [item['name'] for item in response.json()['results']],
             [first.name, second.name],
         )
 
@@ -658,11 +738,11 @@ class ProyectoApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            [project['slug'] for project in response.json()],
+            [project['slug'] for project in response.json()['results']],
             [first.slug, later.slug],
         )
         self.assertEqual(
-            response.json()[0],
+            response.json()['results'][0],
             {
                 'name': 'Proyecto primero',
                 'slug': 'proyecto-primero',
@@ -733,7 +813,8 @@ class ProyectoApiTests(TestCase):
         response = self.client.get('/api/v1/proyectos/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_duplicate_slug(self):
         self.create_project('Primero', 'proyecto')
@@ -782,7 +863,7 @@ class ProyectoApiTests(TestCase):
         response = self.client.get('/api/v1/proyectos/')
 
         self.assertEqual(
-            [item['slug'] for item in response.json()],
+            [item['slug'] for item in response.json()['results']],
             ['proyecto'],
         )
 
@@ -832,14 +913,14 @@ class EnlaceApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json(),
+            response.json()['results'],
             [
                 {'label': first.label, 'type': first.type, 'url': first.url},
                 {'label': second.label, 'type': second.type, 'url': second.url},
             ],
         )
         self.assertEqual(
-            set(response.json()[0]),
+            set(response.json()['results'][0]),
             {'label', 'type', 'url'},
         )
 
@@ -858,7 +939,7 @@ class EnlaceApiTests(TestCase):
         response = self.client.get('/api/v1/enlaces/')
 
         self.assertEqual(
-            [item['label'] for item in response.json()],
+            [item['label'] for item in response.json()['results']],
             [first.label, second.label],
         )
 
@@ -873,7 +954,8 @@ class EnlaceApiTests(TestCase):
         response = self.client.get('/api/v1/enlaces/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['count'], 0)
+        self.assertEqual(response.json()['results'], [])
 
     def test_rejects_invalid_url(self):
         with self.assertRaises(ValidationError):
@@ -887,6 +969,447 @@ class EnlaceApiTests(TestCase):
         response = self.client.post('/api/v1/enlaces/')
 
         self.assertEqual(response.status_code, 405)
+
+
+class PublicApiContractTests(TestCase):
+    public_routes = (
+        '/api/v1/perfil/',
+        '/api/v1/tecnologias/',
+        '/api/v1/experiencias/',
+        '/api/v1/formacion/',
+        '/api/v1/enlaces/',
+        '/api/v1/proyectos/',
+        '/api/v1/proyectos/pintaebook/',
+    )
+
+    def test_public_routes_allow_get_head_and_options_without_authentication(self):
+        for url in self.public_routes:
+            with self.subTest(url=url):
+                get_response = self.client.get(url)
+                self.assertEqual(get_response.status_code, 200)
+                head_response = self.client.head(url)
+                self.assertEqual(head_response.status_code, 200)
+                self.assertEqual(head_response.content, b'')
+                options_response = self.client.options(url)
+                self.assertEqual(options_response.status_code, 204)
+                self.assertEqual(
+                    options_response.headers['Allow'],
+                    'GET, HEAD, OPTIONS',
+                )
+
+    def test_authenticated_admin_cannot_write_to_public_routes(self):
+        administrator = get_user_model().objects.create_superuser(
+            username='public-api-admin',
+            email='admin@example.com',
+        )
+        self.client.force_login(administrator)
+        methods = ('post', 'put', 'patch', 'delete')
+
+        def snapshot():
+            return {
+                'profiles': list(Perfil.objects.order_by('pk').values()),
+                'technologies': list(Tecnologia.objects.order_by('pk').values()),
+                'experiences': list(Experiencia.objects.order_by('pk').values()),
+                'education': list(Formacion.objects.order_by('pk').values()),
+                'links': list(Enlace.objects.order_by('pk').values()),
+                'projects': list(Proyecto.objects.order_by('pk').values()),
+                'project_technologies': list(
+                    Proyecto.technologies.through.objects.order_by('pk').values()
+                ),
+                'additional_links': list(
+                    EnlaceProyecto.objects.order_by('pk').values()
+                ),
+            }
+
+        initial_data = snapshot()
+
+        for url in self.public_routes:
+            for method in methods:
+                with self.subTest(url=url, method=method):
+                    response = getattr(self.client, method)(url, {})
+                    self.assertEqual(response.status_code, 405)
+                    self.assertEqual(
+                        response.json(),
+                        {'detail': 'Método no permitido.'},
+                    )
+                    self.assertEqual(
+                        response.headers['Allow'],
+                        'GET, HEAD, OPTIONS',
+                    )
+
+        self.assertEqual(snapshot(), initial_data)
+
+    def test_unknown_api_route_returns_documented_json_404(self):
+        response = self.client.get('/api/v1/no-existe/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'No se encontró el recurso solicitado.'},
+        )
+
+    def test_invalid_page_size_returns_detail_without_internal_information(self):
+        response = self.client.get('/api/v1/enlaces/?page_size=invalid')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'page_size debe ser un entero mayor que cero.'},
+        )
+
+    def test_all_list_endpoints_use_paginated_envelope(self):
+        list_urls = (
+            '/api/v1/tecnologias/',
+            '/api/v1/experiencias/',
+            '/api/v1/formacion/',
+            '/api/v1/enlaces/',
+            '/api/v1/proyectos/',
+        )
+
+        for url in list_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    set(response.json()),
+                    {'count', 'next', 'previous', 'results'},
+                )
+                self.assertIsInstance(response.json()['count'], int)
+                self.assertIsInstance(response.json()['results'], list)
+
+    def test_profile_and_project_detail_keep_single_object_responses(self):
+        profile = self.client.get('/api/v1/perfil/').json()
+        project = self.client.get(
+            '/api/v1/proyectos/pintaebook/'
+        ).json()
+
+        self.assertIn('name', profile)
+        self.assertNotIn('results', profile)
+        self.assertEqual(project['slug'], 'pintaebook')
+        self.assertNotIn('results', project)
+
+
+class ApiPaginationTests(TestCase):
+    def test_technology_pagination_preserves_grouped_shape_across_pages(self):
+        Tecnologia.objects.all().delete()
+        for index in range(21):
+            Tecnologia.objects.create(
+                name=f'Technology {index:02}',
+                category='Frontend',
+                url=f'https://example.com/technology-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        first_page = self.client.get(
+            '/api/v1/tecnologias/?page_size=20'
+        ).json()
+        second_page = self.client.get(first_page['next']).json()
+
+        self.assertEqual(first_page['count'], 21)
+        self.assertEqual(len(first_page['results'][0]['technologies']), 20)
+        self.assertEqual(len(second_page['results'][0]['technologies']), 1)
+        self.assertEqual(first_page['results'][0]['name'], 'Frontend')
+        self.assertEqual(second_page['results'][0]['name'], 'Frontend')
+        names = [
+            technology['name']
+            for page in (first_page, second_page)
+            for group in page['results']
+            for technology in group['technologies']
+        ]
+        self.assertEqual(len(names), 21)
+        self.assertEqual(len(set(names)), 21)
+
+    def test_default_page_size_and_page_links_do_not_omit_or_repeat_records(self):
+        Enlace.objects.all().delete()
+        for index in range(21):
+            Enlace.objects.create(
+                label=f'Perfil {index:02}',
+                type=f'profile-{index}',
+                url=f'https://example.com/profile-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        first_page = self.client.get('/api/v1/enlaces/').json()
+
+        self.assertEqual(first_page['count'], 21)
+        self.assertEqual(len(first_page['results']), 20)
+        self.assertIsNone(first_page['previous'])
+        self.assertIsNotNone(first_page['next'])
+        self.assertIn('page=2', first_page['next'])
+
+        second_page = self.client.get(first_page['next']).json()
+
+        self.assertEqual(len(second_page['results']), 1)
+        self.assertIsNone(second_page['next'])
+        self.assertIn('page=1', second_page['previous'])
+        all_labels = [
+            item['label']
+            for item in first_page['results'] + second_page['results']
+        ]
+        self.assertEqual(len(all_labels), 21)
+        self.assertEqual(len(set(all_labels)), 21)
+
+    def test_page_size_can_be_set_and_is_capped_at_100(self):
+        for index in range(101):
+            Enlace.objects.create(
+                label=f'Link {index:03}',
+                type=f'link-{index}',
+                url=f'https://example.com/link-{index}',
+                order=index,
+                is_published=True,
+            )
+
+        custom_size = self.client.get(
+            '/api/v1/enlaces/?page_size=7'
+        ).json()
+        capped_size = self.client.get(
+            '/api/v1/enlaces/?page_size=500'
+        ).json()
+
+        self.assertEqual(len(custom_size['results']), 7)
+        self.assertIn('page_size=7', custom_size['next'])
+        self.assertEqual(capped_size['count'], 103)
+        self.assertEqual(len(capped_size['results']), 100)
+        self.assertIn('page_size=500', capped_size['next'])
+
+    def test_out_of_range_and_non_numeric_pages_return_json_404(self):
+        for query in ('page=2', 'page=not-a-number', 'page=0'):
+            with self.subTest(query=query):
+                response = self.client.get(f'/api/v1/enlaces/?{query}')
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(
+                    response.json(),
+                    {'detail': 'La página solicitada no existe.'},
+                )
+
+
+class ContentValidationTests(TestCase):
+    def test_profile_rejects_invalid_image_url_without_persisting_changes(self):
+        profile = Perfil.objects.get()
+        original_image = profile.image_url
+        profile.image_url = 'ftp://example.com/photo.jpg'
+
+        with self.assertRaises(ValidationError) as raised:
+            profile.save()
+
+        self.assertIn('image_url', raised.exception.message_dict)
+        profile.refresh_from_db()
+        self.assertEqual(profile.image_url, original_image)
+
+    def test_technology_rejects_non_http_documentation_url(self):
+        initial_count = Tecnologia.objects.count()
+
+        with self.assertRaises(ValidationError) as raised:
+            Tecnologia.objects.create(
+                name='FTP docs',
+                category='Validation',
+                url='ftp://example.com/docs',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+        self.assertEqual(Tecnologia.objects.count(), initial_count)
+
+    def test_experience_missing_start_date_reports_field_error(self):
+        experience = Experiencia(
+            title='Sin fecha inicial',
+            organization='Organización',
+            description='Descripción',
+            start_date=None,
+            end_date=date(2025, 1, 1),
+        )
+
+        with self.assertRaises(ValidationError) as raised:
+            experience.full_clean()
+
+        self.assertIn('start_date', raised.exception.message_dict)
+
+    def test_education_rejects_non_http_optional_url(self):
+        with self.assertRaises(ValidationError) as raised:
+            Formacion.objects.create(
+                name='Certificación',
+                institution='Institución',
+                type=Formacion.Type.CERTIFICATION,
+                status=Formacion.Status.COMPLETED,
+                start_date=date(2024, 1, 1),
+                end_date=date(2024, 2, 1),
+                url='ftp://example.com/certificate',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+
+    def test_project_rejects_non_http_demo_url(self):
+        with self.assertRaises(ValidationError) as raised:
+            Proyecto.objects.create(
+                title='URL inválida',
+                slug='url-invalida',
+                summary='Resumen',
+                description='Descripción',
+                project_type='Proyecto personal',
+                demo_url='ftp://example.com/demo',
+            )
+
+        self.assertIn('demo_url', raised.exception.message_dict)
+        self.assertFalse(Proyecto.objects.filter(slug='url-invalida').exists())
+
+    def test_project_duplicate_slug_reports_slug_field_error(self):
+        with self.assertRaises(ValidationError) as raised:
+            Proyecto.objects.create(
+                title='Slug existente',
+                slug='pintaebook',
+                summary='Resumen',
+                description='Descripción',
+                project_type='Proyecto personal',
+            )
+
+        self.assertIn('slug', raised.exception.message_dict)
+
+    def test_additional_project_link_rejects_non_http_url(self):
+        project = Proyecto.objects.get(slug='pintaebook')
+
+        with self.assertRaises(ValidationError) as raised:
+            EnlaceProyecto.objects.create(
+                project=project,
+                label='Enlace no HTTP',
+                url='mailto:test@example.com',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+        self.assertFalse(
+            EnlaceProyecto.objects.filter(
+                project=project,
+                label='Enlace no HTTP',
+            ).exists()
+        )
+
+
+class InitialPortfolioDataCommandTests(TestCase):
+    def run_seed_command(self):
+        output = StringIO()
+        call_command('load_portfolio_data', stdout=output)
+        return output.getvalue()
+
+    def test_repeated_runs_keep_stable_primary_keys_and_relationships(self):
+        first_output = self.run_seed_command()
+        first_profile_id = Perfil.objects.get().pk
+        first_technology_ids = list(
+            Tecnologia.objects.order_by('name', 'category').values_list(
+                'id', flat=True
+            )
+        )
+        first_project_ids = list(
+            Proyecto.objects.order_by('slug').values_list('id', flat=True)
+        )
+        first_link_ids = list(
+            Enlace.objects.order_by('type').values_list('id', flat=True)
+        )
+        first_counts = (
+            Perfil.objects.count(),
+            Tecnologia.objects.count(),
+            Proyecto.objects.count(),
+            Enlace.objects.count(),
+            EnlaceProyecto.objects.count(),
+        )
+        self.assertIn('No se cargaron experiencias ni formaciones', first_output)
+
+        self.run_seed_command()
+
+        self.assertEqual(Perfil.objects.get().pk, first_profile_id)
+        self.assertEqual(
+            list(
+                Tecnologia.objects.order_by('name', 'category').values_list(
+                    'id', flat=True
+                )
+            ),
+            first_technology_ids,
+        )
+        self.assertEqual(
+            list(Proyecto.objects.order_by('slug').values_list('id', flat=True)),
+            first_project_ids,
+        )
+        self.assertEqual(
+            list(Enlace.objects.order_by('type').values_list('id', flat=True)),
+            first_link_ids,
+        )
+        self.assertEqual(
+            (
+                Perfil.objects.count(),
+                Tecnologia.objects.count(),
+                Proyecto.objects.count(),
+                Enlace.objects.count(),
+                EnlaceProyecto.objects.count(),
+            ),
+            first_counts,
+        )
+        pintaebook = Proyecto.objects.get(slug='pintaebook')
+        self.assertSetEqual(
+            set(pintaebook.technologies.values_list('name', flat=True)),
+            {'Angular', 'Python', 'Django', 'REST APIs', 'Git', 'GitHub'},
+        )
+        dges = Proyecto.objects.get(slug='dges')
+        self.assertSetEqual(
+            set(dges.technologies.values_list('name', flat=True)),
+            {'PHP', 'WordPress', 'HTML', 'CSS', 'REST APIs', 'AJAX'},
+        )
+
+    def test_invalid_seed_data_is_rejected_without_partial_writes(self):
+        from .management.commands import load_portfolio_data
+
+        original_profile_name = Perfil.objects.get().name
+        initial_counts = (
+            Tecnologia.objects.count(),
+            Proyecto.objects.count(),
+            Enlace.objects.count(),
+        )
+        invalid_project = load_portfolio_data.PROJECTS[0].copy()
+        invalid_project['demo_url'] = 'ftp://invalid.example/demo'
+
+        with patch.object(
+            load_portfolio_data,
+            'PROJECTS',
+            (invalid_project, *load_portfolio_data.PROJECTS[1:]),
+        ):
+            with self.assertRaises(ValidationError) as raised:
+                self.run_seed_command()
+
+        self.assertIn('demo_url', raised.exception.message_dict)
+        self.assertEqual(Perfil.objects.get().name, original_profile_name)
+        self.assertEqual(
+            (
+                Tecnologia.objects.count(),
+                Proyecto.objects.count(),
+                Enlace.objects.count(),
+            ),
+            initial_counts,
+        )
+
+    def test_apply_error_rolls_back_all_seed_changes(self):
+        from .management.commands.load_portfolio_data import Command
+
+        profile = Perfil.objects.get()
+        original_profile_name = profile.name
+        initial_technology_count = Tecnologia.objects.count()
+        original_apply_additional_links = Command._apply_additional_links
+
+        def fail_after_projects_are_saved(command, additional_links):
+            original_apply_additional_links(command, additional_links)
+            raise RuntimeError('Simulated seed failure')
+
+        with patch.object(
+            Command,
+            '_apply_additional_links',
+            fail_after_projects_are_saved,
+        ):
+            with self.assertRaisesMessage(
+                RuntimeError,
+                'Simulated seed failure',
+            ):
+                self.run_seed_command()
+
+        profile.refresh_from_db()
+        self.assertEqual(profile.name, original_profile_name)
+        self.assertEqual(Tecnologia.objects.count(), initial_technology_count)
 
 
 class DjangoAdminPermissionTests(TestCase):
@@ -1024,7 +1547,7 @@ class DjangoAdminPermissionTests(TestCase):
         self.assertEqual(response.status_code, 302)
         link.refresh_from_db()
         self.assertFalse(link.is_published)
-        public_links = self.client.get('/api/v1/enlaces/').json()
+        public_links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertNotIn(link.url, [item['url'] for item in public_links])
 
     def test_editor_admin_changes_to_all_content_types_are_saved_and_public(self):
@@ -1059,7 +1582,9 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(technology_response.status_code, 302)
-        technologies = self.client.get('/api/v1/tecnologias/').json()
+        technologies = self.client.get(
+            '/api/v1/tecnologias/?page_size=100'
+        ).json()['results']
         self.assertIn(
             'Admin Published Technology',
             [
@@ -1083,7 +1608,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(experience_response.status_code, 302)
-        experiences = self.client.get('/api/v1/experiencias/').json()
+        experiences = self.client.get('/api/v1/experiencias/').json()['results']
         self.assertIn(
             'Experiencia desde Admin',
             [item['title'] for item in experiences],
@@ -1104,7 +1629,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(education_response.status_code, 302)
-        education = self.client.get('/api/v1/formacion/').json()
+        education = self.client.get('/api/v1/formacion/').json()['results']
         self.assertIn(
             'Formación desde Admin',
             [item['name'] for item in education],
@@ -1160,7 +1685,7 @@ class DjangoAdminPermissionTests(TestCase):
             },
         )
         self.assertEqual(link_response.status_code, 302)
-        links = self.client.get('/api/v1/enlaces/').json()
+        links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertIn(
             'https://example.com/admin-link',
             [item['url'] for item in links],
@@ -1198,7 +1723,9 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        technologies = self.client.get('/api/v1/tecnologias/').json()
+        technologies = self.client.get(
+            '/api/v1/tecnologias/?page_size=100'
+        ).json()['results']
         self.assertNotIn(
             technology.name,
             [
@@ -1227,7 +1754,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        experiences = self.client.get('/api/v1/experiencias/').json()
+        experiences = self.client.get('/api/v1/experiencias/').json()['results']
         self.assertNotIn(
             experience.title,
             [item['title'] for item in experiences],
@@ -1253,7 +1780,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        education = self.client.get('/api/v1/formacion/').json()
+        education = self.client.get('/api/v1/formacion/').json()['results']
         self.assertNotIn(
             education_record.name,
             [item['name'] for item in education],
@@ -1308,7 +1835,7 @@ class DjangoAdminPermissionTests(TestCase):
             ).status_code,
             302,
         )
-        links = self.client.get('/api/v1/enlaces/').json()
+        links = self.client.get('/api/v1/enlaces/').json()['results']
         self.assertNotIn(link.url, [item['url'] for item in links])
 
     def test_editor_cannot_delete_records_without_explicit_delete_permission(self):
@@ -1324,6 +1851,56 @@ class DjangoAdminPermissionTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Enlace.objects.filter(pk=link.pk).exists())
+
+    @override_settings(CSRF_TRUSTED_ORIGINS=['https://admin.example.com'])
+    def test_csrf_is_required_for_admin_post_and_valid_token_allows_save(self):
+        link = Enlace.objects.get(type='github')
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.editor)
+        change_url = reverse(
+            'admin:portfolio_enlace_change',
+            args=(link.pk,),
+        )
+        form_data = {
+            'label': 'GitHub actualizado con CSRF',
+            'type': link.type,
+            'url': link.url,
+            'order': link.order,
+            'is_published': 'on',
+        }
+
+        form_response = csrf_client.get(change_url)
+        self.assertEqual(form_response.status_code, 200)
+        csrf_token = csrf_client.cookies['csrftoken'].value
+
+        missing_token_response = csrf_client.post(change_url, form_data)
+        invalid_token_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN='invalid-token',
+        )
+        untrusted_origin_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN=csrf_token,
+            HTTP_ORIGIN='https://untrusted.example.com',
+        )
+        link.refresh_from_db()
+        self.assertEqual(missing_token_response.status_code, 403)
+        self.assertEqual(invalid_token_response.status_code, 403)
+        self.assertEqual(untrusted_origin_response.status_code, 403)
+        self.assertEqual(link.label, 'GitHub')
+
+        valid_token_response = csrf_client.post(
+            change_url,
+            form_data,
+            HTTP_X_CSRFTOKEN=csrf_token,
+            HTTP_ORIGIN='https://admin.example.com',
+        )
+
+        self.assertEqual(valid_token_response.status_code, 302)
+        link.refresh_from_db()
+        self.assertEqual(link.label, 'GitHub actualizado con CSRF')
 
     def test_superuser_can_delete_when_authorized(self):
         superuser = get_user_model().objects.create_superuser(
@@ -1351,6 +1928,72 @@ class DjangoAdminPermissionTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(Perfil.objects.count(), 1)
+
+    def test_admin_displays_invalid_demo_url_as_a_field_error(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            self.admin_model_url(Proyecto, 'add'),
+            {
+                'title': 'Proyecto con URL inválida',
+                'slug': 'proyecto-url-invalida',
+                'summary': 'Resumen',
+                'description': 'Descripción',
+                'project_type': 'Proyecto personal',
+                'image_url': '',
+                'image_alt': '',
+                'demo_url': 'ftp://example.com/demo',
+                'demo_label': 'Ver demo',
+                'repository_url': '',
+                'repository_label': 'Repositorio',
+                'technologies': [],
+                'order': '0',
+                'is_published': 'on',
+                'additional_links-TOTAL_FORMS': '0',
+                'additional_links-INITIAL_FORMS': '0',
+                'additional_links-MIN_NUM_FORMS': '0',
+                'additional_links-MAX_NUM_FORMS': '1000',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['adminform'].form
+        self.assertIn('demo_url', form.errors)
+        self.assertFalse(
+            Proyecto.objects.filter(slug='proyecto-url-invalida').exists()
+        )
+
+    def test_admin_displays_duplicate_slug_as_a_field_error(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            self.admin_model_url(Proyecto, 'add'),
+            {
+                'title': 'Proyecto con slug repetido',
+                'slug': 'pintaebook',
+                'summary': 'Resumen',
+                'description': 'Descripción',
+                'project_type': 'Proyecto personal',
+                'image_url': '',
+                'image_alt': '',
+                'demo_url': '',
+                'demo_label': 'Ver demo',
+                'repository_url': '',
+                'repository_label': 'Repositorio',
+                'technologies': [],
+                'order': '0',
+                'is_published': 'on',
+                'additional_links-TOTAL_FORMS': '0',
+                'additional_links-INITIAL_FORMS': '0',
+                'additional_links-MIN_NUM_FORMS': '0',
+                'additional_links-MAX_NUM_FORMS': '1000',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['adminform'].form
+        self.assertIn('slug', form.errors)
+        self.assertEqual(Proyecto.objects.filter(slug='pintaebook').count(), 1)
 
     def test_admin_registrations_cover_all_managed_models(self):
         from .admin import portfolio_admin_site

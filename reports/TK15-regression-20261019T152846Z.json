@@ -1,0 +1,81 @@
+{
+  "task": "TK15 — Automatizar pruebas y ejecutar regresión",
+  "runId": "20261019T152846Z",
+  "startedAt": "2026-10-19T15:28:46.988838+00:00",
+  "environment": {
+    "os": "win32",
+    "python": "3.14.3",
+    "django": "6.1.2",
+    "frontendNode": "v24.13.1",
+    "frontendNpm": "11.10.0",
+    "database": "PostgreSQL; isolated transient E2E database",
+    "developmentDatabaseModified": false,
+    "testDatabase": "portfolio_suite_7d48efe77762",
+    "e2eDatabaseCleanedUp": true
+  },
+  "revisions": {
+    "backend": {
+      "commit": "9e98b49ad9d1014816ae1f90bbea12a3b9c0dcb9",
+      "workingTreeDirty": true
+    },
+    "frontend": {
+      "commit": "d38035cdacfdd0e590240a6514c2711d80c248ad",
+      "workingTreeDirty": true
+    }
+  },
+  "steps": [
+    {
+      "name": "backend-postgresql-suite",
+      "command": [
+        "C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Scripts\\python.exe",
+        "manage.py",
+        "test",
+        "--verbosity",
+        "1",
+        "--noinput"
+      ],
+      "exitCode": 0,
+      "stdout": "Found 84 test(s).\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default'...\n\n....................................................................................\n----------------------------------------------------------------------\nRan 84 tests in 2.696s\n\nOK\nDestroying test database for alias 'default'...\n\n",
+      "testCount": 84
+    },
+    {
+      "name": "create-isolated-e2e-schema",
+      "command": [
+        "C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Scripts\\python.exe",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "exitCode": 0,
+      "stdout": "Operations to perform:\n  Apply all migrations: admin, auth, contenttypes, portfolio, sessions\nRunning migrations:\n  Applying contenttypes.0001_initial... OK\n  Applying auth.0001_initial... OK\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying contenttypes.0002_remove_content_type_name... OK\n  Applying auth.0002_alter_permission_name_max_length... OK\n  Applying auth.0003_alter_user_email_max_length... OK\n  Applying auth.0004_alter_user_username_opts... OK\n  Applying auth.0005_alter_user_last_login_null... OK\n  Applying auth.0006_require_contenttypes_0002... OK\n  Applying auth.0007_alter_validators_add_error_messages... OK\n  Applying auth.0008_alter_user_username_max_length... OK\n  Applying auth.0009_alter_user_last_name_max_length... OK\n  Applying auth.0010_alter_group_name_max_length... OK\n  Applying auth.0011_update_proxy_permissions... OK\n  Applying auth.0012_alter_user_first_name_max_length... OK\n  Applying portfolio.0001_initial... OK\n  Applying portfolio.0002_initial_profile... OK\n  Applying portfolio.0003_tecnologia... OK\n  Applying portfolio.0004_initial_technologies... OK\n  Applying portfolio.0005_experiencia... OK\n  Applying portfolio.0006_formacion... OK\n  Applying portfolio.0007_proyecto_enlaceproyecto... OK\n  Applying portfolio.0008_initial_projects... OK\n  Applying portfolio.0009_enlace... OK\n  Applying portfolio.0010_content_editors... OK\n  Applying portfolio.0011_alter_enlace_url_alter_enlaceproyecto_url_and_more... OK\n  Applying sessions.0001_initial... OK\n",
+      "stderr": ""
+    },
+    {
+      "name": "load-deterministic-e2e-data",
+      "command": [
+        "C:\\Users\\rocii\\Desktop\\script\\nahuel\\portfolio_backend\\.venv\\Scripts\\python.exe",
+        "manage.py",
+        "load_portfolio_e2e_data"
+      ],
+      "exitCode": 0,
+      "stdout": "Carga inicial completada; se procesaron: 1 perfil, 24 tecnologías, 2 proyectos y 2 enlaces profesionales.\nNo se cargaron experiencias ni formaciones: faltan datos verificables aprobados (fechas y detalles).\nLos datos de regresión se cargaron en la base E2E 'portfolio_e2e_fd96a5d051d6'.\n",
+      "stderr": ""
+    },
+    {
+      "name": "frontend-unit-suite",
+      "command": [
+        "node",
+        "node_modules/@angular/cli/bin/ng.js",
+        "test",
+        "--watch=false"
+      ],
+      "exitCode": 0,
+      "stdout": "\u001b[32m✔\u001b[0m \u001b[33mConsole Ninja\u001b[0m extension is connected to \u001b[33mAngular\u001b[0m, see \u001b[36mhttps://tinyurl.com/2vt8jxzw\u001b[0m\n> Building...\n√ Building...\nInitial chunk files                                   | Names                                              |  Raw size\nchunk-D32JK5GA.js                                     | -                                                  | 142.20 kB | \nstyles.css                                            | styles                                             |  16.55 kB | \nchunk-HMII5LOE.js                                     | -                                                  |  16.28 kB | \nspec-app-app.js                                       | spec-app-app                                       |  12.96 kB | \nchunk-GLSN545I.js                                     | -                                                  |  10.05 kB | \nspec-app-shared-data-portfolio-api.service.js         | spec-app-shared-data-portfolio-api.service         |   5.40 kB | \nchunk-CGZBV6BD.js                                     | -                                                  |   4.07 kB | \nspec-app-shared-components-site-header-site-header.js | spec-app-shared-components-site-header-site-header |   1.94 kB | \nspec-app-accessibility.js                             | spec-app-accessibility                             |   1.47 kB | \ninit-testbed.js                                       | init-testbed                                       |   1.21 kB | \nvitest-mock-patch.js                                  | vitest-mock-patch                                  | 974 bytes | \n\n                                                      | Initial total                                      | 213.11 kB\n\nApplication bundle generation complete. [1.785 seconds] - 2026-10-19T15:28:57.399Z\n\n\n RUN  v4.1.12 C:/Users/rocii/Desktop/script/nahuel/cv-proyecto\n\n\n Test Files  4 passed (4)\n      Tests  17 passed (17)\n   Start at  12:28:57\n   Duration  3.01s (transform 299ms, setup 1.26s, import 437ms, tests 2.45s, environment 2.49s)\n\n",
+      "stderr": "Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package\nNot implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package\n"
+    }
+  ],
+  "result": "failed",
+  "evidenceDirectory": "reports\\20261019T152846Z",
+  "finishedAt": "2026-10-19T15:29:00.865632+00:00"
+}

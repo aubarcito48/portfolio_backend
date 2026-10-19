@@ -1,11 +1,82 @@
+from functools import wraps
+
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Prefetch
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.http import HttpResponse, JsonResponse
 
 from .models import Enlace, Experiencia, Formacion, Perfil, Proyecto, Tecnologia
 
 
-@require_GET
+PAGE_SIZE = 20
+MAX_PAGE_SIZE = 100
+ALLOWED_READ_METHODS = ('GET', 'HEAD', 'OPTIONS')
+
+
+def public_read_only(view):
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if request.method == 'OPTIONS':
+            return HttpResponse(
+                status=204,
+                headers={'Allow': ', '.join(ALLOWED_READ_METHODS)},
+            )
+        if request.method not in ('GET', 'HEAD'):
+            return JsonResponse(
+                {'detail': 'Método no permitido.'},
+                status=405,
+                headers={'Allow': ', '.join(ALLOWED_READ_METHODS)},
+            )
+        response = view(request, *args, **kwargs)
+        if request.method == 'HEAD':
+            response.content = b''
+        return response
+
+    return wrapped
+
+
+def paginated_response(request, items, results):
+    try:
+        page_size = int(request.GET.get('page_size', PAGE_SIZE))
+        if page_size < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        return JsonResponse(
+            {'detail': 'page_size debe ser un entero mayor que cero.'},
+            status=400,
+        )
+
+    page_size = min(page_size, MAX_PAGE_SIZE)
+    paginator = Paginator(items, page_size)
+    try:
+        page = paginator.page(request.GET.get('page', 1))
+    except (EmptyPage, PageNotAnInteger):
+        return JsonResponse(
+            {'detail': 'La página solicitada no existe.'},
+            status=404,
+        )
+
+    def page_url(number):
+        query = request.GET.copy()
+        query['page'] = number
+        return request.build_absolute_uri(
+            f'{request.path}?{query.urlencode()}'
+        )
+
+    return JsonResponse(
+        {
+            'count': paginator.count,
+            'next': page_url(page.next_page_number()) if page.has_next() else None,
+            'previous': (
+                page_url(page.previous_page_number())
+                if page.has_previous()
+                else None
+            ),
+            'results': results(page.object_list),
+        }
+    )
+
+
+@public_read_only
 def perfil_publico(request):
     try:
         perfil = Perfil.objects.get(is_published=True)
@@ -18,58 +89,64 @@ def perfil_publico(request):
     return JsonResponse(perfil.to_public_dict())
 
 
-@require_GET
+@public_read_only
 def tecnologias_publicas(request):
-    groups = []
-    group_by_category = {}
-
-    for tecnologia in Tecnologia.objects.filter(is_published=True).order_by(
+    technologies = Tecnologia.objects.filter(is_published=True).order_by(
         'order', 'id'
-    ):
-        group = group_by_category.get(tecnologia.category)
-        if group is None:
-            group = {'name': tecnologia.category, 'technologies': []}
-            group_by_category[tecnologia.category] = group
-            groups.append(group)
-        group['technologies'].append(
-            {'name': tecnologia.name, 'url': tecnologia.url}
-        )
+    )
 
-    return JsonResponse(groups, safe=False)
+    def grouped_results(page_technologies):
+        groups = []
+        group_by_category = {}
+        for technology in page_technologies:
+            group = group_by_category.get(technology.category)
+            if group is None:
+                group = {'name': technology.category, 'technologies': []}
+                group_by_category[technology.category] = group
+                groups.append(group)
+            group['technologies'].append(
+                {'name': technology.name, 'url': technology.url}
+            )
+        return groups
+
+    return paginated_response(request, technologies, grouped_results)
 
 
-@require_GET
+@public_read_only
 def experiencias_publicas(request):
     experiencias = Experiencia.objects.filter(is_published=True).order_by(
         'order', 'id'
     )
-    return JsonResponse(
-        [experiencia.to_public_dict() for experiencia in experiencias],
-        safe=False,
+    return paginated_response(
+        request,
+        experiencias,
+        lambda records: [record.to_public_dict() for record in records],
     )
 
 
-@require_GET
+@public_read_only
 def formacion_publica(request):
     registros = Formacion.objects.filter(is_published=True).order_by(
         'order', 'id'
     )
-    return JsonResponse(
-        [registro.to_public_dict() for registro in registros],
-        safe=False,
+    return paginated_response(
+        request,
+        registros,
+        lambda records: [record.to_public_dict() for record in records],
     )
 
 
-@require_GET
-@require_GET
+@public_read_only
 def enlaces_publicos(request):
     enlaces = Enlace.objects.filter(is_published=True).order_by('order', 'id')
-    return JsonResponse(
-        [enlace.to_public_dict() for enlace in enlaces],
-        safe=False,
+    return paginated_response(
+        request,
+        enlaces,
+        lambda records: [record.to_public_dict() for record in records],
     )
 
 
+@public_read_only
 def proyectos_publicos(request):
     proyectos = (
         Proyecto.objects.filter(is_published=True)
@@ -85,13 +162,14 @@ def proyectos_publicos(request):
         )
         .order_by('order', 'id')
     )
-    return JsonResponse(
-        [proyecto.to_public_dict() for proyecto in proyectos],
-        safe=False,
+    return paginated_response(
+        request,
+        proyectos,
+        lambda records: [project.to_public_dict() for project in records],
     )
 
 
-@require_GET
+@public_read_only
 def detalle_proyecto_publico(request, slug):
     try:
         proyecto = (
@@ -115,3 +193,12 @@ def detalle_proyecto_publico(request, slug):
         )
 
     return JsonResponse(proyecto.to_public_dict())
+
+
+def api_not_found(request, exception=None):
+    if request.path.startswith('/api/'):
+        return JsonResponse(
+            {'detail': 'No se encontró el recurso solicitado.'},
+            status=404,
+        )
+    return HttpResponse('Not found', status=404)
