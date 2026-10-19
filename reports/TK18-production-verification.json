@@ -1,0 +1,133 @@
+{
+  "case": "BE-CP25",
+  "checkedAtUtc": "2026-10-19T18:37:59.568542+00:00",
+  "backend": "https://portfolio-backend-6ecn.onrender.com",
+  "frontend": "https://portfolio-nahuel48.vercel.app",
+  "localRepositoryCommit": "d082a8207ce58ac1fe0a1397acddd167edc9872d",
+  "deployedCommit": "d082a8207ce58ac1fe0a1397acddd167edc9872d",
+  "checks": {
+    "readiness": {
+      "status": 200,
+      "genericJson": true,
+      "https": true
+    },
+    "httpRedirect": {
+      "status": 301,
+      "toHttps": true
+    },
+    "perfil": {
+      "status": 200,
+      "count": 1,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "tecnologias": {
+      "status": 200,
+      "count": 24,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "experiencias": {
+      "status": 200,
+      "count": 0,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "formacion": {
+      "status": 200,
+      "count": 0,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "proyectos": {
+      "status": 200,
+      "count": 2,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "enlaces": {
+      "status": 200,
+      "count": 2,
+      "matchesTransferCount": true,
+      "corsAllowed": true
+    },
+    "publicMethods": {
+      "status": 204,
+      "allow": "GET, HEAD, OPTIONS",
+      "excludesWriteMethods": true
+    },
+    "emptyPostRejected": {
+      "status": 403,
+      "passed": true,
+      "note": "Empty POST to collection only; no record identifiers or data submitted."
+    },
+    "adminLogin": {
+      "status": 200,
+      "loginFormPresent": true,
+      "csrfCookieSecure": true,
+      "styles": {
+        "/static/admin/css/base.css": {
+          "status": 200,
+          "cssContentType": true
+        },
+        "/static/admin/css/dark_mode.css": {
+          "status": 200,
+          "cssContentType": true
+        },
+        "/static/admin/css/nav_sidebar.css": {
+          "status": 200,
+          "cssContentType": true
+        },
+        "/static/admin/css/login.css": {
+          "status": 200,
+          "cssContentType": true
+        },
+        "/static/admin/css/responsive.css": {
+          "status": 200,
+          "cssContentType": true
+        }
+      }
+    },
+    "anonymousAdminRestricted": {
+      "status": 302,
+      "redirectToLogin": true
+    },
+    "generic404": {
+      "status": 404,
+      "noDebugTrace": true
+    },
+    "untrustedCorsDenied": {
+      "status": 200,
+      "noAllowOrigin": true
+    }
+  },
+  "pending": [
+    "Optional stronger evidence from inside Render: active settings, Gunicorn process and read-only database identity; see reports/BE-CP25.md"
+  ],
+  "result": "public_checks_passed_and_owner_confirmed_admin_restart_persistence",
+  "deployedCommitEvidence": "Confirmed by repository owner in chat; not remotely queried",
+  "manualValidation": {
+    "authorizedAdminLogin": "confirmed by owner",
+    "restartAndDataPersistence": "confirmed by owner",
+    "date": "2026-10-19"
+  },
+  "supabaseDirectReadOnlyVerification": {
+    "passed": true,
+    "countsAndSerializedValuesMatchTransfer": true,
+    "projectTechnologyRelations": 12,
+    "sslActive": true,
+    "appliedMigrations": 29,
+    "executedFrom": "local workstation, not Render"
+  },
+  "productionDeployCheck": {
+    "executedFrom": "local workstation",
+    "settings": "config.settings_supabase",
+    "errors": 0,
+    "warnings": [
+      "security.W004",
+      "security.W008"
+    ],
+    "intentionalSilencedCheck": "mail.E001",
+    "justifications": "reports/BE-CP25.md"
+  }
+}

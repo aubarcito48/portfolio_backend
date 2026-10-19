@@ -1,0 +1,71 @@
+{
+  "checkedAtUtc": "2026-10-19T18:38:32.606Z",
+  "actualPublishedFrontend": true,
+  "noRequestInterception": true,
+  "contentReady": true,
+  "apiResponses": [
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/perfil/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/formacion/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/enlaces/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/tecnologias/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/proyectos/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/experiencias/",
+      "status": 200
+    },
+    {
+      "url": "https://portfolio-backend-6ecn.onrender.com/api/v1/tecnologias/?page=2",
+      "status": 200
+    }
+  ],
+  "apiFailures": [],
+  "projectCards": 2,
+  "technologyLinks": 24,
+  "images": [
+    {
+      "path": "/assets/bandera-argentina.png",
+      "loaded": true,
+      "frontendOrigin": true
+    },
+    {
+      "path": "/assets/morgan.png",
+      "loaded": true,
+      "frontendOrigin": true
+    },
+    {
+      "path": "/assets/nahuel-carrousel.png",
+      "loaded": true,
+      "frontendOrigin": true
+    },
+    {
+      "path": "/assets/nahuel.jpg",
+      "loaded": true,
+      "frontendOrigin": true
+    },
+    {
+      "path": "/assets/pintaebook.png",
+      "loaded": true,
+      "frontendOrigin": true
+    },
+    {
+      "path": "/assets/dges.png",
+      "loaded": true,
+      "frontendOrigin": true
+    }
+  ]
+}

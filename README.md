@@ -16,6 +16,12 @@ aplicación inicial es `portfolio`.
 
 ## Despliegue en Render
 
+TK18: backend publicado y comprobaciones públicas aprobadas el 19/10/2026.
+El responsable confirmó acceso administrativo, reinicio y persistencia con el
+commit `d082a82`. Ver [procedimiento actual Render/Supabase](docs/RENDER_DEPLOYMENT.md)
+y [BE-CP25: evidencias y límites](reports/BE-CP25.md). Las notas de ensayo local
+de esta sección son históricas; no sustituyen la comprobación del servicio.
+
 Crear un Web Service Python conectado a este repositorio. `manage.py` está
 en la raíz; **Root Directory se deja vacío**.
 
@@ -33,10 +39,11 @@ despliegue, sin ejecutar tests sobre la base de producción.
 Configurar en Render `DJANGO_ENVIRONMENT=production`, `DJANGO_DEBUG=False`, una
 `DJANGO_SECRET_KEY` nueva y persistente, y `DJANGO_ALLOWED_HOSTS` con el hostname
 real sin esquema ni rutas. Para PostgreSQL se requieren `POSTGRES_DB`,
-`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` interno y
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` del proveedor y
 `POSTGRES_PORT=5432`; el código no interpreta `DATABASE_URL`. Cargar los valores
-en Render sin versionarlos ni compartirlos. Servicio y base deben estar en la
-misma región para usar la conexión interna.
+en Render sin versionarlos ni compartirlos. Se eligió Supabase: la conexión no
+usa la red interna de Render. Preservar SSL y el esquema `portfolio_django` según
+`docs/RENDER_DEPLOYMENT.md`; los settings base solos no configuran esas opciones.
 
 `DJANGO_CORS_ALLOWED_ORIGINS` debe contener el origen HTTPS exacto del frontend.
 El Admin utiliza CSRF; configurar `DJANGO_CSRF_TRUSTED_ORIGINS` con sus orígenes
