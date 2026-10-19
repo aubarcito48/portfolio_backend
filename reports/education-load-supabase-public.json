@@ -1,0 +1,14 @@
+{
+  "database": "supabase-public",
+  "executedAtUtc": "2026-10-19T21:09:53.780161+00:00",
+  "educationBefore": 0,
+  "educationAfter": 2,
+  "publishedAfter": 2,
+  "otherPortfolioDataUnchanged": true,
+  "idempotentLoadVerified": true,
+  "djangoApiStatus": 200,
+  "backup": "backups\\education-update\\supabase-public\\application-before.dump",
+  "backupSha256": "7bd63adae47335d3a3c2926768a5e2f9bb986f6c7da8683e35f8538bb7b9bb20",
+  "dates": "ISPC March 2024, stored as 2024-03-01 to represent month precision; certificate issued 2026-06-01",
+  "result": "passed"
+}

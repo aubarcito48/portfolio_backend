@@ -1,0 +1,23 @@
+{
+  "verifiedAtUtc": "2026-10-19T21:10:22.689560+00:00",
+  "publicApiStatus": 200,
+  "educationCount": 2,
+  "startMonth": "2024-03",
+  "storedStartDateRepresentsMonth": "2024-03-01",
+  "certificateIssueDate": "2026-06-01",
+  "certificateUrlMatchesApprovedDrive": true,
+  "driveHttpStatus": 200,
+  "driveRedirectsToLogin": false,
+  "frontendCodeChanged": false,
+  "schemaChanged": false,
+  "backendDeployRequiredForContent": false,
+  "backendTestsPassed": 115,
+  "localAndSupabaseReports": [
+    "education-load-local.json",
+    "education-load-supabase.json",
+    "education-load-supabase-public.json"
+  ],
+  "deploymentFinding": "Supabase has public and portfolio_django application tables. Published API became populated after loading approved education into public. No runtime config or grants changed.",
+  "visualBrowserVerification": "Not executed: no connected browser available; verified published API over HTTP.",
+  "backendCommitBase": "9ee26bd24f97d9903d7d6ab1f166e851c0b5b565"
+}
