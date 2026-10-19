@@ -137,7 +137,7 @@ class PerfilApiTests(TestCase):
         self.assertEqual(response.json()['name'], 'Nahuel Argandoña')
         self.assertEqual(
             response.json()['specialty'],
-            'Full-Stack Developer | Software Development | QA & Testing',
+            'Desarrollador full stack | Desarrollo de software | Calidad y pruebas',
         )
         self.assertEqual(
             response.json()['biography'],
@@ -547,7 +547,7 @@ class FormacionApiTests(TestCase):
             response.json()['results'],
             [
                 {
-                    'name': 'Junior Full Stack Developer',
+                    'name': 'Desarrollador full stack junior',
                     'institution': 'Instituto Superior Politécnico de Córdoba (ISPC)',
                     'type': 'certification',
                     'status': 'completed',
@@ -568,8 +568,9 @@ class FormacionApiTests(TestCase):
         )
         self.assertEqual(
             response.json()['results'][0]['name'],
-            certification.name,
+            'Desarrollador full stack junior',
         )
+        self.assertEqual(certification.name, 'Junior Full Stack Developer')
 
     def test_returns_empty_list_when_no_education_is_published(self):
         self.create_formacion(

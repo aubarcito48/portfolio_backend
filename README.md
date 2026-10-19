@@ -3,6 +3,9 @@
 Backend del portfolio con Django. El proyecto Django se llama `config` y la
 aplicación inicial es `portfolio`.
 
+El contenido público admite español e inglés con `?lang=es` / `?lang=en`.
+Ver [idiomas, mantenimiento de traducciones y orden de publicación](docs/I18N.md).
+
 ## Versiones
 
 - Python 3.14.3

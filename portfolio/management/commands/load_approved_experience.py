@@ -8,8 +8,8 @@ from portfolio.models import Experiencia
 
 
 # Dates represent month precision; the owner confirmed January for freelance.
-# Preserve the titles, tasks and ordering supplied by the owner.
-APPROVED_EXPERIENCE = (
+# Original owner-supplied text, kept only to recognize the authorized translation.
+ORIGINAL_EXPERIENCE = (
     {
         'title': 'Web Development Intern',
         'organization': 'DGES',
@@ -41,6 +41,23 @@ APPROVED_EXPERIENCE = (
         'start_date': date(2024, 11, 1), 'end_date': date(2025, 5, 1),
         'is_current': False, 'order': 2,
     },
+)
+
+SPANISH_TEXT = (
+    ('Pasante de desarrollo web',
+     'Trabajé con WordPress en un entorno profesional.\n'
+     'Adquirí experiencia práctica en el desarrollo y mantenimiento de sitios web.'),
+    ('Desarrollador full stack independiente',
+     'Desarrollo aplicaciones web y funcionalidades de frontend y backend.\n'
+     'Integro APIs y trabajo con bases de datos.\n'
+     'Utilizo herramientas de control de versiones y desarrollo colaborativo.'),
+    ('Soporte técnico informático',
+     'Brindé soporte técnico en un entorno organizacional.\n'
+     'Colaboré en el diagnóstico y la resolución de problemas informáticos.'),
+)
+APPROVED_EXPERIENCE = tuple(
+    {**original, 'title': title, 'description': description}
+    for original, (title, description) in zip(ORIGINAL_EXPERIENCE, SPANISH_TEXT)
 )
 
 

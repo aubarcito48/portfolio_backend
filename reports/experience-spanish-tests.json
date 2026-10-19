@@ -1,0 +1,11 @@
+{
+  "executedAtUtc": "2026-10-19T21:31:05.203729+00:00",
+  "baseCommit": "ba56f2be8d78fdecdba059c0d1cf805e9d4dfda5",
+  "workingTree": "uncommitted experience Spanish translation",
+  "environment": "Windows; project .venv; isolated local PostgreSQL test database",
+  "settings": "config.settings_local_transfer; ALLOWED_HOSTS testserver/localhost; TEST.NAME test_portfolio_experience_translation",
+  "targetedTests": 7,
+  "fullSuiteTests": 122,
+  "failures": 0,
+  "result": "passed"
+}

@@ -1,10 +1,12 @@
 from functools import wraps
+import json
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Prefetch
 from django.http import HttpResponse, JsonResponse
 
 from .models import Enlace, Experiencia, Formacion, Perfil, Proyecto, Tecnologia
+from .localization import localize_payload
 
 
 PAGE_SIZE = 20
@@ -12,21 +14,34 @@ MAX_PAGE_SIZE = 100
 ALLOWED_READ_METHODS = ('GET', 'HEAD', 'OPTIONS')
 
 
+def localized_response(response, language):
+    if response.get('Content-Type', '').startswith('application/json'):
+        response.content = json.dumps(
+            localize_payload(json.loads(response.content), language), ensure_ascii=False,
+        )
+    response['Content-Language'] = language
+    return response
+
+
 def public_read_only(view):
     @wraps(view)
     def wrapped(request, *args, **kwargs):
+        language = request.GET.get('lang', 'es')
+        if language not in ('es', 'en'):
+            return JsonResponse({'detail': 'Idioma no admitido. Usá es o en.'}, status=400)
         if request.method == 'OPTIONS':
             return HttpResponse(
                 status=204,
                 headers={'Allow': ', '.join(ALLOWED_READ_METHODS)},
             )
         if request.method not in ('GET', 'HEAD'):
-            return JsonResponse(
+            return localized_response(JsonResponse(
                 {'detail': 'Método no permitido.'},
                 status=405,
                 headers={'Allow': ', '.join(ALLOWED_READ_METHODS)},
-            )
+            ), language)
         response = view(request, *args, **kwargs)
+        localized_response(response, language)
         if request.method == 'HEAD':
             response.content = b''
         return response

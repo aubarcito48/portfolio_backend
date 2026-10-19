@@ -1,0 +1,16 @@
+{
+  "database": "supabase",
+  "executedAtUtc": "2026-10-19T21:31:16.867478+00:00",
+  "experienceBefore": 3,
+  "experienceAfter": 3,
+  "publishedAfter": 3,
+  "otherPortfolioDataUnchanged": true,
+  "idempotentLoadVerified": true,
+  "language": "es",
+  "onlyTitlesAndDescriptionsChanged": true,
+  "djangoApiStatus": 200,
+  "backup": "backups\\experience-spanish\\supabase\\application-before.dump",
+  "backupSha256": "93aeafdf878261c6bb94a4873d615d71d9f0a20dee4343a50df8b341d1ebcfe4",
+  "dates": "DGES Jun-Nov 2025; Freelance Jan 2023-present; Sanatorio Frances Nov 2024-May 2025; day 1 represents month precision",
+  "result": "passed"
+}
