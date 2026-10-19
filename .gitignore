@@ -23,3 +23,6 @@ media/
 .coverage
 htmlcov/
 .vscode/
+
+# Bulky execution evidence is retained locally; version the JSON/Markdown summaries.
+reports/*/

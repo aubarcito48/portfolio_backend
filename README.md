@@ -104,6 +104,69 @@ usuario PostgreSQL necesita permiso `CREATEDB` para que Django cree esa base
 temporal. La prueba de persistencia guarda un registro ORM, cierra la conexión
 y lo consulta desde una conexión nueva.
 
+### Regresión completa TK15
+
+Para ejecutar la regresión del backend y del portfolio integrado en Windows,
+configurá `.env`, instalá las dependencias del frontend (`npm ci`) e instalá los
+navegadores Playwright (`npx playwright install chromium firefox webkit`).
+Desde `portfolio_backend`, ejecutá:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_regression.py
+```
+
+El runner ejecuta la suite Django en una base PostgreSQL con nombre aleatorio
+`portfolio_suite_*`, distinta de `POSTGRES_DB` y de cualquier base de pruebas
+preexistente. Django la crea y elimina al terminar. Después crea una base
+`portfolio_e2e_*`, aplica migraciones y carga datos deterministas, incluidos
+registros sintéticos publicados y borradores. El comando de carga rechaza
+bases sin ese prefijo o sin las marcas explícitas del entorno de pruebas.
+Nunca ejecutes la carga E2E sobre desarrollo o producción.
+
+También ejecuta las pruebas unitarias de Angular y el build de producción.
+Inicia Django y Angular localmente y corre Playwright con Chromium, Firefox y
+WebKit en anchos de 360, 768 y 1440 px, con dos workers y sin reintentos locales.
+La matriz combina la regresión aislada con recorridos `BE-CP22` contra la API
+real: contenido publicado, 24 tecnologías en dos páginas, borradores excluidos
+(incluso relaciones y detalle), navegación, destinos de enlaces y tema
+persistido. Un fallo de red controlado permite comprobar carga, error y
+reintento: la recuperación obtiene el perfil desde Django sin simular la
+respuesta exitosa. Los casos aislados verifican además las listas vacías y el
+perfil no publicado; no se consulta contenido de servicios externos.
+
+Una comprobación HTTP adicional valida el contrato y CORS. Al finalizar, aun
+si hay fallos, el runner detiene sus servidores y elimina exclusivamente la
+base E2E que creó. El usuario PostgreSQL necesita `CREATEDB`; los puertos 8000
+y 4301 deben estar libres. Se esperan los repositorios hermanos
+`portfolio_backend/` y `cv-proyecto/`.
+
+Cada ejecución conserva:
+
+- `reports/TK15-regression-<fechaUTC>.json` y una copia `latest`: fecha,
+  versiones reales, commits, estado del árbol de trabajo, hashes SHA-256 de
+  fuentes, comandos, salidas, cantidades y estado de BE-CP22.
+- `reports/<fechaUTC>/playwright-report/index.html`: informe navegable.
+- `reports/<fechaUTC>/playwright-results.json`: resultados por caso y entorno.
+- `reports/<fechaUTC>/test-results/`: capturas de contenido publicado y, en
+  fallos, video, captura y trace.
+- `reports/<fechaUTC>/django.log` y `angular.log`: registros persistentes.
+
+Los JSON resumidos y el registro de defectos se pueden versionar. Los
+subdirectorios de evidencia pesada se conservan localmente y se excluyen de
+Git; para compartirlos, adjuntá esa carpeta comprimida. No contienen `.env`.
+Los hashes identifican también las modificaciones locales que todavía no
+forman parte de los commits registrados.
+
+Para abrir la evidencia, desde `cv-proyecto`:
+
+```powershell
+npx playwright show-report ..\portfolio_backend\reports\<fechaUTC>\playwright-report
+npx playwright show-trace <ruta-al-trace.zip>
+```
+
+El estado y los defectos de la ejecución de cierre están en
+[`reports/BE-CP22.md`](reports/BE-CP22.md).
+
 ## Carga inicial de datos
 
 Con las migraciones aplicadas, cargá o actualizá el contenido inicial aprobado
