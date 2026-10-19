@@ -17,9 +17,11 @@ Including another URLconf
 from django.urls import include, path, re_path
 
 from portfolio.admin import portfolio_admin_site
+from portfolio.health import health
 from portfolio.views import api_not_found
 
 urlpatterns = [
+    path('health/', health, name='health'),
     path('admin/', portfolio_admin_site.urls),
     path('api/v1/', include('portfolio.urls')),
     re_path(r'^api/.*$', api_not_found),
