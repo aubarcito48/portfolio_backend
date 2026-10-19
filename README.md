@@ -89,6 +89,39 @@ usuario PostgreSQL necesita permiso `CREATEDB` para que Django cree esa base
 temporal. La prueba de persistencia guarda un registro ORM, cierra la conexión
 y lo consulta desde una conexión nueva.
 
+## Perfil público
+
+La migración inicial crea el perfil publicado con los datos que ya muestra el
+frontend. Se puede actualizar desde Django Admin; la aplicación permite un
+solo perfil.
+
+`GET /api/v1/perfil/` devuelve HTTP 200 con los campos públicos en camelCase
+compatibles con el frontend:
+
+```json
+{
+  "name": "Nahuel Argandoña",
+  "specialty": "Full-Stack Developer | Software Development | QA & Testing",
+  "biography": "Biografía del perfil",
+  "location": "Córdoba, Argentina",
+  "photo": "/assets/nahuel.jpg"
+}
+```
+
+El estado de publicación y la fecha de actualización no se exponen. Si no hay
+un perfil publicado, responde HTTP 404:
+
+```json
+{
+  "detail": "No hay un perfil publicado."
+}
+```
+
+## API
+
+El endpoint de perfil permite consulta únicamente mediante `GET`; los demás
+métodos responden HTTP 405.
+
 ## Relación con el frontend
 
 El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
