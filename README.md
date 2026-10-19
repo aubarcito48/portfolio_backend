@@ -89,6 +89,28 @@ usuario PostgreSQL necesita permiso `CREATEDB` para que Django cree esa base
 temporal. La prueba de persistencia guarda un registro ORM, cierra la conexión
 y lo consulta desde una conexión nueva.
 
+## Carga inicial de datos
+
+Con las migraciones aplicadas, cargá o actualizá el contenido inicial aprobado
+por Nahuel desde la carpeta del backend:
+
+```powershell
+python manage.py load_portfolio_data
+```
+
+El comando es repetible: actualiza el perfil, las tecnologías, los proyectos,
+sus relaciones y enlaces profesionales por sus claves estables, conservando
+los IDs existentes y sin borrar contenido adicional administrado desde Admin.
+Valida todos los registros antes de escribirlos y ejecuta la aplicación dentro
+de una transacción; cualquier error aborta y revierte la ejecución completa.
+No contiene credenciales.
+
+El frontend confirma el perfil, las tecnologías, los proyectos y los enlaces
+GitHub/LinkedIn. No se cargan experiencias ni formación porque faltan fechas y
+detalles verificables para completar esos registros sin inventar información.
+Cuando Nahuel valide esos datos, se podrán agregar al comando y cargar desde
+Admin.
+
 ## Perfil público
 
 La migración inicial crea el perfil publicado con los datos que ya muestra el

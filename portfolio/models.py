@@ -4,6 +4,19 @@ from django.db import models
 from django.db.models import Q
 
 
+def validate_http_url(value):
+    URLValidator(schemes=('http', 'https'))(value)
+
+
+def validate_image_url(value):
+    if value.startswith('/') and not value.startswith('//'):
+        return
+    validate_http_url(value)
+
+
+validate_project_image_url = validate_image_url
+
+
 class Perfil(models.Model):
     singleton_key = models.PositiveSmallIntegerField(
         default=1,
@@ -14,7 +27,10 @@ class Perfil(models.Model):
     professional_title = models.CharField(max_length=200)
     biography = models.TextField()
     location = models.CharField(max_length=150)
-    image_url = models.CharField(max_length=500)
+    image_url = models.CharField(
+        max_length=500,
+        validators=[validate_image_url],
+    )
     is_published = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -33,6 +49,7 @@ class Perfil(models.Model):
         self.singleton_key = 1
         if self._state.adding and type(self).objects.exists():
             raise ValidationError('Solo puede existir un perfil.')
+        self.full_clean()
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -51,7 +68,7 @@ class Perfil(models.Model):
 class Tecnologia(models.Model):
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=100)
-    url = models.URLField(max_length=500)
+    url = models.URLField(max_length=500, validators=[validate_http_url])
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=False)
 
@@ -102,7 +119,11 @@ class Experiencia(models.Model):
 
     def clean(self):
         super().clean()
-        if self.end_date and self.end_date < self.start_date:
+        if (
+            self.start_date
+            and self.end_date
+            and self.end_date < self.start_date
+        ):
             raise ValidationError(
                 {'end_date': 'La fecha de fin no puede ser anterior a la fecha de inicio.'}
             )
@@ -144,7 +165,11 @@ class Formacion(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
-    url = models.URLField(max_length=500, blank=True)
+    url = models.URLField(
+        max_length=500,
+        blank=True,
+        validators=[validate_http_url],
+    )
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=False)
 
@@ -205,12 +230,6 @@ class Formacion(models.Model):
         }
 
 
-def validate_project_image_url(value):
-    if value.startswith('/') and not value.startswith('//'):
-        return
-    URLValidator(schemes=('http', 'https'))(value)
-
-
 class Proyecto(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
@@ -220,12 +239,20 @@ class Proyecto(models.Model):
     image_url = models.CharField(
         max_length=500,
         blank=True,
-        validators=[validate_project_image_url],
+        validators=[validate_image_url],
     )
     image_alt = models.CharField(max_length=300, blank=True)
-    demo_url = models.URLField(max_length=500, blank=True)
+    demo_url = models.URLField(
+        max_length=500,
+        blank=True,
+        validators=[validate_http_url],
+    )
     demo_label = models.CharField(max_length=100, blank=True, default='Ver demo')
-    repository_url = models.URLField(max_length=500, blank=True)
+    repository_url = models.URLField(
+        max_length=500,
+        blank=True,
+        validators=[validate_http_url],
+    )
     repository_label = models.CharField(
         max_length=100,
         blank=True,
@@ -246,8 +273,6 @@ class Proyecto(models.Model):
 
     def clean(self):
         super().clean()
-        if self.image_url:
-            validate_project_image_url(self.image_url)
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -294,13 +319,17 @@ class EnlaceProyecto(models.Model):
         related_name='additional_links',
     )
     label = models.CharField(max_length=100)
-    url = models.URLField(max_length=500)
+    url = models.URLField(max_length=500, validators=[validate_http_url])
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ('order', 'id')
         verbose_name = 'enlace adicional del proyecto'
         verbose_name_plural = 'enlaces adicionales del proyecto'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.label} - {self.project.title}'
@@ -311,7 +340,7 @@ class Enlace(models.Model):
     type = models.CharField(max_length=50)
     url = models.URLField(
         max_length=500,
-        validators=[URLValidator(schemes=('http', 'https'))],
+        validators=[validate_http_url],
     )
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=False)

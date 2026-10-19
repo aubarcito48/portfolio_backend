@@ -1,9 +1,12 @@
 from datetime import date
+from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.db import IntegrityError, connection, transaction
 from django.urls import reverse
 from django.test import TestCase, TransactionTestCase, override_settings
@@ -889,6 +892,233 @@ class EnlaceApiTests(TestCase):
         self.assertEqual(response.status_code, 405)
 
 
+class ContentValidationTests(TestCase):
+    def test_profile_rejects_invalid_image_url_without_persisting_changes(self):
+        profile = Perfil.objects.get()
+        original_image = profile.image_url
+        profile.image_url = 'ftp://example.com/photo.jpg'
+
+        with self.assertRaises(ValidationError) as raised:
+            profile.save()
+
+        self.assertIn('image_url', raised.exception.message_dict)
+        profile.refresh_from_db()
+        self.assertEqual(profile.image_url, original_image)
+
+    def test_technology_rejects_non_http_documentation_url(self):
+        initial_count = Tecnologia.objects.count()
+
+        with self.assertRaises(ValidationError) as raised:
+            Tecnologia.objects.create(
+                name='FTP docs',
+                category='Validation',
+                url='ftp://example.com/docs',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+        self.assertEqual(Tecnologia.objects.count(), initial_count)
+
+    def test_experience_missing_start_date_reports_field_error(self):
+        experience = Experiencia(
+            title='Sin fecha inicial',
+            organization='Organización',
+            description='Descripción',
+            start_date=None,
+            end_date=date(2025, 1, 1),
+        )
+
+        with self.assertRaises(ValidationError) as raised:
+            experience.full_clean()
+
+        self.assertIn('start_date', raised.exception.message_dict)
+
+    def test_education_rejects_non_http_optional_url(self):
+        with self.assertRaises(ValidationError) as raised:
+            Formacion.objects.create(
+                name='Certificación',
+                institution='Institución',
+                type=Formacion.Type.CERTIFICATION,
+                status=Formacion.Status.COMPLETED,
+                start_date=date(2024, 1, 1),
+                end_date=date(2024, 2, 1),
+                url='ftp://example.com/certificate',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+
+    def test_project_rejects_non_http_demo_url(self):
+        with self.assertRaises(ValidationError) as raised:
+            Proyecto.objects.create(
+                title='URL inválida',
+                slug='url-invalida',
+                summary='Resumen',
+                description='Descripción',
+                project_type='Proyecto personal',
+                demo_url='ftp://example.com/demo',
+            )
+
+        self.assertIn('demo_url', raised.exception.message_dict)
+        self.assertFalse(Proyecto.objects.filter(slug='url-invalida').exists())
+
+    def test_project_duplicate_slug_reports_slug_field_error(self):
+        with self.assertRaises(ValidationError) as raised:
+            Proyecto.objects.create(
+                title='Slug existente',
+                slug='pintaebook',
+                summary='Resumen',
+                description='Descripción',
+                project_type='Proyecto personal',
+            )
+
+        self.assertIn('slug', raised.exception.message_dict)
+
+    def test_additional_project_link_rejects_non_http_url(self):
+        project = Proyecto.objects.get(slug='pintaebook')
+
+        with self.assertRaises(ValidationError) as raised:
+            EnlaceProyecto.objects.create(
+                project=project,
+                label='Enlace no HTTP',
+                url='mailto:test@example.com',
+            )
+
+        self.assertIn('url', raised.exception.message_dict)
+        self.assertFalse(
+            EnlaceProyecto.objects.filter(
+                project=project,
+                label='Enlace no HTTP',
+            ).exists()
+        )
+
+
+class InitialPortfolioDataCommandTests(TestCase):
+    def run_seed_command(self):
+        output = StringIO()
+        call_command('load_portfolio_data', stdout=output)
+        return output.getvalue()
+
+    def test_repeated_runs_keep_stable_primary_keys_and_relationships(self):
+        first_output = self.run_seed_command()
+        first_profile_id = Perfil.objects.get().pk
+        first_technology_ids = list(
+            Tecnologia.objects.order_by('name', 'category').values_list(
+                'id', flat=True
+            )
+        )
+        first_project_ids = list(
+            Proyecto.objects.order_by('slug').values_list('id', flat=True)
+        )
+        first_link_ids = list(
+            Enlace.objects.order_by('type').values_list('id', flat=True)
+        )
+        first_counts = (
+            Perfil.objects.count(),
+            Tecnologia.objects.count(),
+            Proyecto.objects.count(),
+            Enlace.objects.count(),
+            EnlaceProyecto.objects.count(),
+        )
+        self.assertIn('No se cargaron experiencias ni formaciones', first_output)
+
+        self.run_seed_command()
+
+        self.assertEqual(Perfil.objects.get().pk, first_profile_id)
+        self.assertEqual(
+            list(
+                Tecnologia.objects.order_by('name', 'category').values_list(
+                    'id', flat=True
+                )
+            ),
+            first_technology_ids,
+        )
+        self.assertEqual(
+            list(Proyecto.objects.order_by('slug').values_list('id', flat=True)),
+            first_project_ids,
+        )
+        self.assertEqual(
+            list(Enlace.objects.order_by('type').values_list('id', flat=True)),
+            first_link_ids,
+        )
+        self.assertEqual(
+            (
+                Perfil.objects.count(),
+                Tecnologia.objects.count(),
+                Proyecto.objects.count(),
+                Enlace.objects.count(),
+                EnlaceProyecto.objects.count(),
+            ),
+            first_counts,
+        )
+        pintaebook = Proyecto.objects.get(slug='pintaebook')
+        self.assertSetEqual(
+            set(pintaebook.technologies.values_list('name', flat=True)),
+            {'Angular', 'Python', 'Django', 'REST APIs', 'Git', 'GitHub'},
+        )
+        dges = Proyecto.objects.get(slug='dges')
+        self.assertSetEqual(
+            set(dges.technologies.values_list('name', flat=True)),
+            {'PHP', 'WordPress', 'HTML', 'CSS', 'REST APIs', 'AJAX'},
+        )
+
+    def test_invalid_seed_data_is_rejected_without_partial_writes(self):
+        from .management.commands import load_portfolio_data
+
+        original_profile_name = Perfil.objects.get().name
+        initial_counts = (
+            Tecnologia.objects.count(),
+            Proyecto.objects.count(),
+            Enlace.objects.count(),
+        )
+        invalid_project = load_portfolio_data.PROJECTS[0].copy()
+        invalid_project['demo_url'] = 'ftp://invalid.example/demo'
+
+        with patch.object(
+            load_portfolio_data,
+            'PROJECTS',
+            (invalid_project, *load_portfolio_data.PROJECTS[1:]),
+        ):
+            with self.assertRaises(ValidationError) as raised:
+                self.run_seed_command()
+
+        self.assertIn('demo_url', raised.exception.message_dict)
+        self.assertEqual(Perfil.objects.get().name, original_profile_name)
+        self.assertEqual(
+            (
+                Tecnologia.objects.count(),
+                Proyecto.objects.count(),
+                Enlace.objects.count(),
+            ),
+            initial_counts,
+        )
+
+    def test_apply_error_rolls_back_all_seed_changes(self):
+        from .management.commands.load_portfolio_data import Command
+
+        profile = Perfil.objects.get()
+        original_profile_name = profile.name
+        initial_technology_count = Tecnologia.objects.count()
+        original_apply_additional_links = Command._apply_additional_links
+
+        def fail_after_projects_are_saved(command, additional_links):
+            original_apply_additional_links(command, additional_links)
+            raise RuntimeError('Simulated seed failure')
+
+        with patch.object(
+            Command,
+            '_apply_additional_links',
+            fail_after_projects_are_saved,
+        ):
+            with self.assertRaisesMessage(
+                RuntimeError,
+                'Simulated seed failure',
+            ):
+                self.run_seed_command()
+
+        profile.refresh_from_db()
+        self.assertEqual(profile.name, original_profile_name)
+        self.assertEqual(Tecnologia.objects.count(), initial_technology_count)
+
+
 class DjangoAdminPermissionTests(TestCase):
     managed_models = (
         Perfil,
@@ -1351,6 +1581,72 @@ class DjangoAdminPermissionTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(Perfil.objects.count(), 1)
+
+    def test_admin_displays_invalid_demo_url_as_a_field_error(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            self.admin_model_url(Proyecto, 'add'),
+            {
+                'title': 'Proyecto con URL inválida',
+                'slug': 'proyecto-url-invalida',
+                'summary': 'Resumen',
+                'description': 'Descripción',
+                'project_type': 'Proyecto personal',
+                'image_url': '',
+                'image_alt': '',
+                'demo_url': 'ftp://example.com/demo',
+                'demo_label': 'Ver demo',
+                'repository_url': '',
+                'repository_label': 'Repositorio',
+                'technologies': [],
+                'order': '0',
+                'is_published': 'on',
+                'additional_links-TOTAL_FORMS': '0',
+                'additional_links-INITIAL_FORMS': '0',
+                'additional_links-MIN_NUM_FORMS': '0',
+                'additional_links-MAX_NUM_FORMS': '1000',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['adminform'].form
+        self.assertIn('demo_url', form.errors)
+        self.assertFalse(
+            Proyecto.objects.filter(slug='proyecto-url-invalida').exists()
+        )
+
+    def test_admin_displays_duplicate_slug_as_a_field_error(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            self.admin_model_url(Proyecto, 'add'),
+            {
+                'title': 'Proyecto con slug repetido',
+                'slug': 'pintaebook',
+                'summary': 'Resumen',
+                'description': 'Descripción',
+                'project_type': 'Proyecto personal',
+                'image_url': '',
+                'image_alt': '',
+                'demo_url': '',
+                'demo_label': 'Ver demo',
+                'repository_url': '',
+                'repository_label': 'Repositorio',
+                'technologies': [],
+                'order': '0',
+                'is_published': 'on',
+                'additional_links-TOTAL_FORMS': '0',
+                'additional_links-INITIAL_FORMS': '0',
+                'additional_links-MIN_NUM_FORMS': '0',
+                'additional_links-MAX_NUM_FORMS': '1000',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['adminform'].form
+        self.assertIn('slug', form.errors)
+        self.assertEqual(Proyecto.objects.filter(slug='pintaebook').count(), 1)
 
     def test_admin_registrations_cover_all_managed_models(self):
         from .admin import portfolio_admin_site
