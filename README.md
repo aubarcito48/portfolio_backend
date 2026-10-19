@@ -169,6 +169,32 @@ incorporan al catálogo de tecnologías porque están asociados al proyecto DGES
 Los proyectos, sus tecnologías y enlaces adicionales pueden administrarse en
 Django Admin.
 
+### Enlaces profesionales
+
+`GET /api/v1/enlaces/` devuelve HTTP 200 con una lista de enlaces publicados,
+ordenados por `order` ascendente y luego por ID. Cada elemento incluye solo
+`label`, `type` y `url`:
+
+```json
+[
+  {
+    "label": "GitHub",
+    "type": "github",
+    "url": "https://github.com/aubarcito48"
+  },
+  {
+    "label": "LinkedIn",
+    "type": "linkedin",
+    "url": "https://www.linkedin.com/in/aubar48/"
+  }
+]
+```
+
+Las URL deben ser válidas y utilizar HTTP o HTTPS. Los enlaces despublicados no
+aparecen; si no hay enlaces publicados, el endpoint devuelve HTTP 200 con `[]`.
+La migración inicial carga los perfiles públicos de GitHub y LinkedIn definidos
+en el frontend. Los enlaces se pueden agregar y administrar en Django Admin.
+
 ### Tecnologías
 
 `GET /api/v1/tecnologias/` devuelve HTTP 200 y una lista de grupos compatible

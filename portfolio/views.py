@@ -2,7 +2,7 @@ from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .models import Experiencia, Formacion, Perfil, Proyecto, Tecnologia
+from .models import Enlace, Experiencia, Formacion, Perfil, Proyecto, Tecnologia
 
 
 @require_GET
@@ -61,6 +61,15 @@ def formacion_publica(request):
 
 
 @require_GET
+@require_GET
+def enlaces_publicos(request):
+    enlaces = Enlace.objects.filter(is_published=True).order_by('order', 'id')
+    return JsonResponse(
+        [enlace.to_public_dict() for enlace in enlaces],
+        safe=False,
+    )
+
+
 def proyectos_publicos(request):
     proyectos = (
         Proyecto.objects.filter(is_published=True)

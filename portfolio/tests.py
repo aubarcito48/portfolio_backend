@@ -6,6 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from django.test import TestCase, TransactionTestCase, override_settings
 
 from .models import (
+    Enlace,
     EnlaceProyecto,
     Experiencia,
     Formacion,
@@ -781,3 +782,105 @@ class ProyectoApiTests(TestCase):
             [item['slug'] for item in response.json()],
             ['proyecto'],
         )
+
+
+class EnlaceApiTests(TestCase):
+    def setUp(self):
+        Enlace.objects.all().delete()
+
+    def create_enlace(
+        self,
+        label,
+        type,
+        url,
+        order=0,
+        is_published=True,
+    ):
+        return Enlace.objects.create(
+            label=label,
+            type=type,
+            url=url,
+            order=order,
+            is_published=is_published,
+        )
+
+    def test_returns_only_published_links_with_public_fields_in_order(self):
+        second = self.create_enlace(
+            'LinkedIn',
+            'linkedin',
+            'https://www.linkedin.com/in/example/',
+            order=2,
+        )
+        first = self.create_enlace(
+            'GitHub',
+            'github',
+            'https://github.com/example',
+            order=1,
+        )
+        self.create_enlace(
+            'Borrador',
+            'other',
+            'https://example.com/draft',
+            order=0,
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/enlaces/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            [
+                {'label': first.label, 'type': first.type, 'url': first.url},
+                {'label': second.label, 'type': second.type, 'url': second.url},
+            ],
+        )
+        self.assertEqual(
+            set(response.json()[0]),
+            {'label', 'type', 'url'},
+        )
+
+    def test_resolves_equal_order_using_ascending_id(self):
+        first = self.create_enlace(
+            'Primero',
+            'other',
+            'https://example.com/first',
+        )
+        second = self.create_enlace(
+            'Segundo',
+            'other',
+            'https://example.com/second',
+        )
+
+        response = self.client.get('/api/v1/enlaces/')
+
+        self.assertEqual(
+            [item['label'] for item in response.json()],
+            [first.label, second.label],
+        )
+
+    def test_returns_empty_list_when_no_links_are_published(self):
+        self.create_enlace(
+            'Borrador',
+            'other',
+            'https://example.com/draft',
+            is_published=False,
+        )
+
+        response = self.client.get('/api/v1/enlaces/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_rejects_invalid_url(self):
+        with self.assertRaises(ValidationError):
+            self.create_enlace('Inválido', 'other', 'esto-no-es-una-url')
+
+    def test_rejects_non_http_protocol(self):
+        with self.assertRaises(ValidationError):
+            self.create_enlace('FTP', 'other', 'ftp://example.com/profile')
+
+    def test_only_allows_get_requests(self):
+        response = self.client.post('/api/v1/enlaces/')
+
+        self.assertEqual(response.status_code, 405)

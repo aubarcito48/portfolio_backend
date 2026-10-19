@@ -304,3 +304,33 @@ class EnlaceProyecto(models.Model):
 
     def __str__(self):
         return f'{self.label} - {self.project.title}'
+
+
+class Enlace(models.Model):
+    label = models.CharField(max_length=100)
+    type = models.CharField(max_length=50)
+    url = models.URLField(
+        max_length=500,
+        validators=[URLValidator(schemes=('http', 'https'))],
+    )
+    order = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('order', 'id')
+        verbose_name = 'enlace profesional'
+        verbose_name_plural = 'enlaces profesionales'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.label
+
+    def to_public_dict(self):
+        return {
+            'label': self.label,
+            'type': self.type,
+            'url': self.url,
+        }

@@ -13,6 +13,7 @@ urlpatterns = [
         name='experiencias-publicas',
     ),
     path('formacion/', views.formacion_publica, name='formacion-publica'),
+    path('enlaces/', views.enlaces_publicos, name='enlaces-publicos'),
     path('proyectos/', views.proyectos_publicos, name='proyectos-publicos'),
     path(
         'proyectos/<slug:slug>/',

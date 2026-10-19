@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    Enlace,
     EnlaceProyecto,
     Experiencia,
     Formacion,
@@ -8,6 +9,15 @@ from .models import (
     Proyecto,
     Tecnologia,
 )
+
+
+@admin.register(Enlace)
+class EnlaceAdmin(admin.ModelAdmin):
+    list_display = ('label', 'type', 'url', 'order', 'is_published')
+    list_filter = ('type', 'is_published')
+    list_editable = ('order', 'is_published')
+    search_fields = ('label', 'type', 'url')
+    ordering = ('order', 'id')
 
 
 @admin.register(Perfil)
