@@ -7,6 +7,9 @@ aplicación inicial es `portfolio`.
 
 - Python 3.14.3
 - Django 6.1.2
+- django-cors-headers 4.9.0
+- PostgreSQL 18.3
+- Psycopg 3.3.6 (`psycopg[binary]`)
 - Dependencias exactas: [`requirements.txt`](./requirements.txt)
 
 ## Instalación local (Windows / PowerShell)
@@ -27,8 +30,9 @@ generarla con:
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Configurá esa clave en `.env`. El archivo está excluido de Git; no compartas ni
-versiones sus valores reales.
+Configurá esa clave y las credenciales de PostgreSQL en `.env`. El archivo está
+excluido de Git; no compartas ni versiones sus valores reales. Django rechaza
+la clave ilustrativa `replace-with-...`.
 
 ### Variables de entorno
 
@@ -38,15 +42,20 @@ versiones sus valores reales.
 | `DJANGO_SECRET_KEY` | Obligatoria en todos los entornos; nunca uses la clave de ejemplo. |
 | `DJANGO_DEBUG` | `True` o `False`. Por defecto se activa solo en desarrollo; en producción debe ser `False`. |
 | `DJANGO_ALLOWED_HOSTS` | Hosts separados por coma. En producción es obligatorio y explícito. |
-| `POSTGRES_DB` | Nombre previsto para la base PostgreSQL. |
-| `POSTGRES_USER` | Usuario previsto de PostgreSQL. |
-| `POSTGRES_PASSWORD` | Contraseña local de PostgreSQL; no la guardes en Git. |
-| `POSTGRES_HOST` | Host del servidor PostgreSQL. |
-| `POSTGRES_PORT` | Puerto del servidor PostgreSQL. |
+| `DJANGO_CORS_ALLOWED_ORIGINS` | Orígenes web permitidos separados por coma. En desarrollo permite por defecto `http://localhost:4200`. |
+| `POSTGRES_DB` | Base PostgreSQL de desarrollo. Obligatoria. |
+| `POSTGRES_USER` | Usuario PostgreSQL. Obligatoria. |
+| `POSTGRES_PASSWORD` | Contraseña PostgreSQL. Obligatoria; no la guardes en Git. |
+| `POSTGRES_HOST` | Host PostgreSQL. Por defecto: `127.0.0.1`. |
+| `POSTGRES_PORT` | Puerto PostgreSQL. Por defecto: `5432`. |
+| `POSTGRES_TEST_DB` | Base exclusiva para pruebas. Por defecto: `test_<POSTGRES_DB>`. |
 
-Las variables `POSTGRES_*` quedan preparadas para la configuración de base de
-datos de TK03; hasta entonces el proyecto usa SQLite. `.env.example` documenta
-nombres y valores ilustrativos, no credenciales utilizables.
+`.env.example` documenta nombres y valores ilustrativos, no credenciales
+utilizables. Django se conecta a PostgreSQL; el usuario configurado necesita
+permisos sobre la base de desarrollo y permiso `CREATEDB` para que Django cree
+la base de pruebas. `POSTGRES_TEST_DB` debe ser distinta de `POSTGRES_DB`.
+El runner de Django crea y elimina la base de pruebas al ejecutar tests, así
+que debe ser una base dedicada y descartable.
 
 Para producción, configurá `DJANGO_ENVIRONMENT=production`, una clave segura,
 `DJANGO_DEBUG=False` y la lista real de `DJANGO_ALLOWED_HOSTS`. Si faltan la
@@ -55,18 +64,30 @@ de configuración descriptivo sin imprimir valores secretos. El entorno de
 pruebas puede seleccionarse con `DJANGO_ENVIRONMENT=test`; `DEBUG` queda
 desactivado por defecto.
 
+La API permite CORS para el frontend Angular local en `http://localhost:4200`
+durante desarrollo. En otros entornos, definí explícitamente
+`DJANGO_CORS_ALLOWED_ORIGINS` con los orígenes confiables, incluyendo esquema y
+puerto (por ejemplo, `https://portfolio.example.com`). No se habilita acceso
+desde cualquier origen ni se activa el envío de credenciales por CORS.
+
 ## Comprobaciones y servidor
 
 Con el entorno virtual activado y `.env` configurado:
 
 ```powershell
 python manage.py check
+python manage.py migrate
+python manage.py showmigrations
+$env:DJANGO_ENVIRONMENT = "test"
 python manage.py test
+$env:DJANGO_ENVIRONMENT = "development"
 python manage.py runserver
 ```
 
-La configuración inicial usa SQLite. `manage.py test` encuentra 0 pruebas en
-esta etapa de scaffolding; se agregarán pruebas con los endpoints y modelos.
+`manage.py test` usa `POSTGRES_TEST_DB`, separada de la base de desarrollo. El
+usuario PostgreSQL necesita permiso `CREATEDB` para que Django cree esa base
+temporal. La prueba de persistencia guarda un registro ORM, cierra la conexión
+y lo consulta desde una conexión nueva.
 
 ## Relación con el frontend
 
