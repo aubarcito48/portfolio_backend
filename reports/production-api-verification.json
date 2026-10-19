@@ -1,0 +1,52 @@
+{
+  "checkedAtUtc": "2026-10-19T16:57:19.356190+00:00",
+  "renderDatabaseIdentityVerifiedFromRuntime": false,
+  "reason": "Public API equality does not prove runtime database identity. Run verify_runtime_database inside Render.",
+  "publicApi": {
+    "perfil": {
+      "httpStatus": 200,
+      "count": 1,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    },
+    "tecnologias": {
+      "httpStatus": 200,
+      "count": 24,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    },
+    "experiencias": {
+      "httpStatus": 200,
+      "count": 0,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    },
+    "formacion": {
+      "httpStatus": 200,
+      "count": 0,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    },
+    "proyectos": {
+      "httpStatus": 200,
+      "count": 2,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    },
+    "enlaces": {
+      "httpStatus": 200,
+      "count": 2,
+      "matchesSupabasePublicResponse": true,
+      "allowsPublishedFrontendOrigin": true
+    }
+  },
+  "healthHttpStatus": 200,
+  "assetFilesMatchProductionBuild": {
+    "/assets/dges.png": true,
+    "/assets/nahuel.jpg": true,
+    "/assets/pintaebook.png": true
+  },
+  "productionApiUrlInBundle": true,
+  "developmentApiUrlPreserved": true,
+  "publishedFrontendCorsAllowed": true
+}

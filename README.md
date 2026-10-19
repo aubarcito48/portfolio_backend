@@ -90,6 +90,12 @@ Transferencia real completada y comparada el 19/10/2026; evidencia sin secretos 
 [`reports/supabase-transfer-execution.json`](reports/supabase-transfer-execution.json).
 El destino ya contiene la aplicación: no repetir `import-new`.
 
+Para verificar la conexión activa dentro del servicio desplegado, sin mostrar
+secretos ni modificar datos, consultar
+[`docs/VERIFY_RENDER_DATABASE.md`](docs/VERIFY_RENDER_DATABASE.md).
+La API pública coincide con Supabase; la identidad interna de Render requiere
+la comprobación dentro de su proceso, no puede deducirse solo de `/health/`.
+
 Desde la carpeta `portfolio_backend`:
 
 ```powershell
