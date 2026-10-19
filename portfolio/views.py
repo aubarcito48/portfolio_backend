@@ -1,7 +1,8 @@
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .models import Perfil, Tecnologia
+from .models import Enlace, Experiencia, Formacion, Perfil, Proyecto, Tecnologia
 
 
 @require_GET
@@ -35,3 +36,82 @@ def tecnologias_publicas(request):
         )
 
     return JsonResponse(groups, safe=False)
+
+
+@require_GET
+def experiencias_publicas(request):
+    experiencias = Experiencia.objects.filter(is_published=True).order_by(
+        'order', 'id'
+    )
+    return JsonResponse(
+        [experiencia.to_public_dict() for experiencia in experiencias],
+        safe=False,
+    )
+
+
+@require_GET
+def formacion_publica(request):
+    registros = Formacion.objects.filter(is_published=True).order_by(
+        'order', 'id'
+    )
+    return JsonResponse(
+        [registro.to_public_dict() for registro in registros],
+        safe=False,
+    )
+
+
+@require_GET
+@require_GET
+def enlaces_publicos(request):
+    enlaces = Enlace.objects.filter(is_published=True).order_by('order', 'id')
+    return JsonResponse(
+        [enlace.to_public_dict() for enlace in enlaces],
+        safe=False,
+    )
+
+
+def proyectos_publicos(request):
+    proyectos = (
+        Proyecto.objects.filter(is_published=True)
+        .prefetch_related(
+            Prefetch(
+                'technologies',
+                queryset=Tecnologia.objects.filter(is_published=True).order_by(
+                    'order', 'id'
+                ),
+                to_attr='published_technologies',
+            ),
+            'additional_links',
+        )
+        .order_by('order', 'id')
+    )
+    return JsonResponse(
+        [proyecto.to_public_dict() for proyecto in proyectos],
+        safe=False,
+    )
+
+
+@require_GET
+def detalle_proyecto_publico(request, slug):
+    try:
+        proyecto = (
+            Proyecto.objects.filter(is_published=True)
+            .prefetch_related(
+                Prefetch(
+                    'technologies',
+                    queryset=Tecnologia.objects.filter(
+                        is_published=True
+                    ).order_by('order', 'id'),
+                    to_attr='published_technologies',
+                ),
+                'additional_links',
+            )
+            .get(slug=slug)
+        )
+    except Proyecto.DoesNotExist:
+        return JsonResponse(
+            {'detail': 'No se encontró el proyecto publicado.'},
+            status=404,
+        )
+
+    return JsonResponse(proyecto.to_public_dict())

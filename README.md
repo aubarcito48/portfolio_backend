@@ -117,10 +117,111 @@ un perfil publicado, responde HTTP 404:
 }
 ```
 
+## Administración del contenido
+
+La administración está disponible en `/admin/`. Las personas sin iniciar
+sesión deben autenticarse; el acceso requiere una cuenta activa con `is_staff`
+y al menos un permiso sobre contenido del portfolio, además de los permisos
+correspondientes a cada modelo. El índice del Admin y los modelos ajenos a sus
+permisos quedan denegados. Creá una cuenta administrativa
+local con:
+
+```powershell
+python manage.py createsuperuser
+```
+
+La migración crea el grupo **Editores de contenido**, con permisos explícitos
+de consulta, creación y edición para Perfil, Tecnología, Experiencia,
+Formación, Proyecto y Enlace, además de los permisos requeridos para administrar
+los enlaces complementarios de proyectos desde su inline. El grupo no recibe
+permisos de eliminación; asignalos individualmente solo cuando sean necesarios.
+Para dar acceso a un editor, creá una cuenta desde Django Admin y agregala al
+grupo. No se crean usuarios ni contraseñas por defecto. El perfil mantiene la
+restricción de un único registro; las tecnologías de los proyectos se
+seleccionan mediante un control de selección múltiple.
+
+Los listados permiten buscar y filtrar contenido, y editar en línea el orden y
+el estado de publicación cuando corresponde. Despublicar un elemento lo oculta
+de los endpoints públicos sin eliminarlo. Los cambios hechos desde Admin se
+guardan en PostgreSQL.
+
 ## API
 
 Los endpoints de consulta permiten únicamente `GET`; los demás métodos
 responden HTTP 405.
+
+### Proyectos
+
+`GET /api/v1/proyectos/` devuelve los proyectos publicados en orden ascendente
+por `order` y, para empates, por ID. `GET /api/v1/proyectos/{slug}/` devuelve
+el detalle de un proyecto publicado. El formato mantiene los campos que usa el
+frontend:
+
+```json
+{
+  "name": "PintaEbook",
+  "slug": "pintaebook",
+  "summary": "Plataforma de libros y ebooks desarrollada por el equipo ISPC / ProCoders.",
+  "type": "Proyecto en equipo",
+  "image": "/assets/pintaebook.png",
+  "imageAlt": "Página de inicio de PintaEbook con su presentación y navegación",
+  "description": "Descripción del proyecto.",
+  "technologies": ["Angular", "Python", "Django"],
+  "links": [
+    {
+      "label": "Ver demo",
+      "url": "https://pinta-ebook-eta.vercel.app/"
+    }
+  ]
+}
+```
+
+Cada tecnología aparece como máximo una vez por proyecto y solo si está
+publicada. Los proyectos despublicados no aparecen en el listado ni en detalle.
+Una imagen puede ser una ruta local del frontend (por ejemplo
+`/assets/pintaebook.png`) o una URL HTTP/HTTPS; demo, repositorio y enlaces
+adicionales, cuando se proporcionan, deben ser URLs válidas. Si no hay
+proyectos publicados, el listado responde HTTP 200 con `[]`. Para un slug
+inexistente o despublicado, el detalle responde HTTP 404:
+
+```json
+{
+  "detail": "No se encontró el proyecto publicado."
+}
+```
+
+La migración inicial carga los proyectos PintaEbook y DGES con la información
+y enlaces definidos en el frontend. Incluye los enlaces adicionales de
+frontend/backend y todos sus conocimientos técnicos; HTML, CSS y AJAX se
+incorporan al catálogo de tecnologías porque están asociados al proyecto DGES.
+Los proyectos, sus tecnologías y enlaces adicionales pueden administrarse en
+Django Admin.
+
+### Enlaces profesionales
+
+`GET /api/v1/enlaces/` devuelve HTTP 200 con una lista de enlaces publicados,
+ordenados por `order` ascendente y luego por ID. Cada elemento incluye solo
+`label`, `type` y `url`:
+
+```json
+[
+  {
+    "label": "GitHub",
+    "type": "github",
+    "url": "https://github.com/aubarcito48"
+  },
+  {
+    "label": "LinkedIn",
+    "type": "linkedin",
+    "url": "https://www.linkedin.com/in/aubar48/"
+  }
+]
+```
+
+Las URL deben ser válidas y utilizar HTTP o HTTPS. Los enlaces despublicados no
+aparecen; si no hay enlaces publicados, el endpoint devuelve HTTP 200 con `[]`.
+La migración inicial carga los perfiles públicos de GitHub y LinkedIn definidos
+en el frontend. Los enlaces se pueden agregar y administrar en Django Admin.
 
 ### Tecnologías
 
@@ -149,6 +250,64 @@ publicadas, el endpoint devuelve HTTP 200 con `[]`. La migración inicial carga
 las tecnologías que muestra actualmente el frontend, y pueden administrarse
 en Django Admin.
 
+### Experiencias profesionales
+
+`GET /api/v1/experiencias/` devuelve HTTP 200 con una lista ordenada de
+experiencias publicadas:
+
+```json
+[
+  {
+    "title": "Puesto",
+    "organization": "Organización",
+    "description": "Descripción de la experiencia.",
+    "startDate": "2022-03-01",
+    "endDate": null,
+    "isCurrent": true
+  }
+]
+```
+
+Las fechas usan el formato ISO `YYYY-MM-DD`. Para experiencias actuales,
+`endDate` es `null`; una fecha final no puede ser anterior a la inicial, y una
+experiencia actual no puede tener fecha final. El endpoint devuelve `[]` si no
+hay experiencias publicadas.
+
+El frontend existente no contiene registros de experiencia con puestos,
+organizaciones y fechas verificables. Por eso la migración crea el modelo, pero
+no inventa ni precarga experiencias; los datos validados se pueden cargar en
+Django Admin.
+
+### Formación y certificaciones
+
+`GET /api/v1/formacion/` devuelve HTTP 200 con una lista ordenada de registros
+publicados:
+
+```json
+[
+  {
+    "name": "Tecnicatura Superior en Desarrollo de Software",
+    "institution": "Instituto Superior Politécnico de Córdoba (ISPC)",
+    "type": "study",
+    "status": "in_progress",
+    "startDate": "2022-03-01",
+    "endDate": null,
+    "url": null
+  }
+]
+```
+
+`type` admite `study` o `certification`; `status` admite `in_progress` o
+`completed`. La formación en curso no tiene fecha de fin y la finalizada debe
+tenerla; la fecha de fin tampoco puede ser anterior a la de inicio. `url` es
+opcional y, cuando se informa, debe ser una URL válida. Si no hay registros
+publicados, el endpoint devuelve HTTP 200 con `[]`.
+
+El frontend confirma el nombre del estudio, ISPC y la certificación Junior Full
+Stack Developer, pero no proporciona fechas de inicio/finalización verificadas.
+Por eso la migración crea el modelo sin inventar ni precargar registros; los
+datos validados se pueden cargar desde Django Admin.
+
 ## Relación con el frontend
 
 El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
@@ -161,6 +320,6 @@ El contrato de datos de referencia está en `cv-proyecto/src/app/shared/data/`:
 - `focus-chill.data.ts`: configuración de reproducción con `enabled`,
   `spotifyUrl`, `iframeTitle` y `autoplay`.
 
-La API de perfil y tecnologías mantiene los nombres públicos que consume el
-frontend. Las demás secciones se incorporarán en tareas siguientes; en TK04 y
-TK05 no se modificó el frontend.
+La API de perfil, tecnologías y formación usa nombres JSON camelCase para las
+fechas y conserva las estructuras públicas de las secciones del frontend. En
+TK04–TK07 no se modificó el frontend.
