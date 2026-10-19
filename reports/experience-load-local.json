@@ -1,0 +1,14 @@
+{
+  "database": "local",
+  "executedAtUtc": "2026-10-19T21:18:09.002440+00:00",
+  "experienceBefore": 0,
+  "experienceAfter": 3,
+  "publishedAfter": 3,
+  "otherPortfolioDataUnchanged": true,
+  "idempotentLoadVerified": true,
+  "djangoApiStatus": 200,
+  "backup": "backups\\experience-update\\local\\application-before.dump",
+  "backupSha256": "f96d4b217252bed17b0c2e96d3701781c638e670b801a47d20de529a70892b05",
+  "dates": "DGES Jun-Nov 2025; Freelance Jan 2023-present; Sanatorio Frances Nov 2024-May 2025; day 1 represents month precision",
+  "result": "passed"
+}

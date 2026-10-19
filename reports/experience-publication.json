@@ -1,0 +1,40 @@
+{
+  "verifiedAtUtc": "2026-10-19T21:19:34.996088+00:00",
+  "publicApiStatus": 200,
+  "publishedExperienceCount": 3,
+  "publishedEducationStillPresent": 2,
+  "datesAndOrganizationsMatchOwnerInput": true,
+  "backendTestsPassed": 119,
+  "frontendCodeChanged": false,
+  "schemaChanged": false,
+  "deployRequiredForContent": false,
+  "credentialsExposed": false,
+  "baseCommit": "a27e328d159f713cdb6de586496028b0b4cdb47d",
+  "implementationSha256": {
+    "portfolio\\management\\commands\\load_approved_experience.py": "79bd8e7c19005d041a0c7f02c2380ce185a0a061b0ed5c95cc9d27bdbcbc2227",
+    "portfolio\\test_approved_experience.py": "1ae3d571b471d183918773c339721e72d0c0ffd91dae57ac311c2a3be7514d97"
+  },
+  "destinations": [
+    {
+      "destination": "local",
+      "published": 3,
+      "otherPortfolioDataUnchanged": true,
+      "backupCreated": true,
+      "idempotenceVerified": true
+    },
+    {
+      "destination": "supabase-public",
+      "published": 3,
+      "otherPortfolioDataUnchanged": true,
+      "backupCreated": true,
+      "idempotenceVerified": true
+    },
+    {
+      "destination": "supabase",
+      "published": 3,
+      "otherPortfolioDataUnchanged": true,
+      "backupCreated": true,
+      "idempotenceVerified": true
+    }
+  ]
+}
