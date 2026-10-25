@@ -1,0 +1,40 @@
+{
+  "verifiedAtUtc": "2026-10-25T20:31:23.181Z",
+  "portfolio": "https://portfolio-nahuel48.vercel.app/",
+  "apiStatus": 200,
+  "publishedCount": 3,
+  "imageStatus": 200,
+  "cardRendered": true,
+  "mobileNoOverflow": true,
+  "project": {
+    "name": "StitchWeather",
+    "slug": "stitchweather",
+    "summary": "Aplicación del clima con pronóstico, geolocalización y recomendaciones con inteligencia artificial.",
+    "type": "Proyecto personal",
+    "image": "https://app-clima-ecru.vercel.app/app-clima.png",
+    "imageAlt": "StitchWeather con el clima de Córdoba y recomendaciones generadas con inteligencia artificial",
+    "description": "Aplicación del clima con búsqueda de ciudades, geolocalización y pronóstico. Integra OpenWeather y recomendaciones con IA mediante Groq, con interfaz en español e inglés. Desarrollada con Angular, Tailwind CSS, Python y Django.",
+    "technologies": [
+      "Angular",
+      "Tailwind CSS",
+      "Python",
+      "Django",
+      "REST APIs"
+    ],
+    "links": [
+      {
+        "label": "Ver demo",
+        "url": "https://app-clima-ecru.vercel.app/"
+      },
+      {
+        "label": "Backend",
+        "url": "https://github.com/aubarcito48/app-clima-backend"
+      },
+      {
+        "label": "Frontend",
+        "url": "https://github.com/aubarcito48/app-clima"
+      }
+    ]
+  },
+  "translationNote": "New project text remains Spanish in lang=en until the backend translation catalog is deployed."
+}

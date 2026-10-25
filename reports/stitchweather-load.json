@@ -1,0 +1,15 @@
+{
+  "executedAtUtc": "2026-10-25T20:30:52.171722+00:00",
+  "schema": "public",
+  "publishedCount": 3,
+  "existingRecordsPreserved": true,
+  "privateSchemaPreserved": true,
+  "idempotent": true,
+  "beforeSha256": "11e53f87b74c0af7fcd9069d29627fa4ce89841bb550e683e93b140b1d360de4",
+  "afterSha256": "8342afdfd4dbc7e8539094bd81658a19a2fbc6ea3c0bae3b4d29083d329e7507",
+  "backup": "backups\\stitchweather-20261025T203052Z",
+  "commandOutput": [
+    "StitchWeather: id=3; schema=public; created=True; published=True.",
+    "StitchWeather: id=3; schema=public; created=False; published=True."
+  ]
+}
