@@ -5,6 +5,14 @@ original value; URLs, slugs, dates, identifiers and publication are never transl
 """
 
 ENGLISH = {
+    'Asistente de escritorio con ESP32, avatar animado, control por voz e inteligencia artificial.':
+        'Desktop assistant with ESP32, an animated avatar, voice control and artificial intelligence.',
+    'Asistente de escritorio con un avatar animado en una pantalla Waveshare ESP32-S3. Combina firmware en C++ y un panel de control en Python para manejar 28 expresiones y 23 animaciones por voz. Integra conversaciones con Groq, respuestas habladas con Dora y comandos para buscar y reproducir videos de YouTube desde la PC.':
+        'Desktop assistant with an animated avatar on a Waveshare ESP32-S3 display. It combines C++ firmware and a Python control panel to manage 28 expressions and 23 animations by voice. It integrates conversations with Groq, spoken responses with Dora, and commands to search for and play YouTube videos from the PC.',
+    'Proyecto personal · Hardware e IA': 'Personal project · Hardware and AI',
+    'Avatar de Aubar Bot en una pantalla Waveshare ESP32-S3':
+        'Aubar Bot avatar on a Waveshare ESP32-S3 display',
+    'Sistemas embebidos': 'Embedded systems',
     'Full-Stack Developer | Software Development | QA & Testing':
         'Full-Stack Developer | Software Development | QA & Testing',
     'Soy desarrollador de software de Córdoba, Argentina, y actualmente curso la Tecnicatura Superior en Desarrollo de Software en el Instituto Superior Politécnico de Córdoba (ISPC).':

@@ -3,6 +3,11 @@
 Backend del portfolio con Django. El proyecto Django se llama `config` y la
 aplicación inicial es `portfolio`.
 
+El [Curriculum Vitae se administra como enlace profesional](docs/CV_PUBLICATION.md),
+desde el backend y Supabase, sin fijar su URL en Angular.
+
+Proyecto de hardware incorporado al portfolio: [Aubar Bot · publicación y verificación](docs/AUBAR_BOT_PUBLICATION.md).
+
 ## Aubar · Asistente con IA
 
 El portfolio incluye un chat en español e inglés. Django obtiene únicamente

@@ -1,0 +1,13 @@
+{
+  "target": "local",
+  "applied": true,
+  "schema": "public",
+  "backup": "backups\\aubar-bot-20261028T155039Z-local.json",
+  "beforeDigest": "344a90f3e62a8429c6ce7f26a182528d24c2165f14f07430913a3047e5e9c0cd",
+  "afterDigest": "5b78b6f859d953a77705a0845b9dde3f8e75cb57800701b924c900b75073660c",
+  "existingRowsUnchanged": true,
+  "privateSchemaUnchanged": true,
+  "idempotent": true,
+  "projectsBefore": 2,
+  "projectsAfter": 3
+}

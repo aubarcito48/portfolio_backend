@@ -1,0 +1,13 @@
+{
+  "target": "supabase",
+  "applied": true,
+  "schema": "public",
+  "backup": "backups\\aubar-bot-20261028T155100Z-supabase.json",
+  "beforeDigest": "36c7b239a961f67f223a47ef2347aa3c66f08c2c2921cea469d5a3bd8d181d62",
+  "afterDigest": "59785d1b4386fce07725931fceae638753642c4cf7477be493992a17261a84fd",
+  "existingRowsUnchanged": true,
+  "privateSchemaUnchanged": true,
+  "idempotent": true,
+  "projectsBefore": 3,
+  "projectsAfter": 4
+}
