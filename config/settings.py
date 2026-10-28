@@ -115,7 +115,11 @@ CORS_ALLOWED_ORIGINS = parse_trusted_origins(
     'http://localhost:4200' if ENVIRONMENT == 'development' else '',
 )
 CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_METHODS = ('GET', 'HEAD', 'OPTIONS')
+CORS_ALLOW_METHODS = ('GET', 'HEAD', 'OPTIONS', 'POST')
+
+# Keys remain server-side; no local language model is loaded into Render RAM.
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-20b').strip()
 
 CSRF_TRUSTED_ORIGINS = parse_trusted_origins(
     'DJANGO_CSRF_TRUSTED_ORIGINS',

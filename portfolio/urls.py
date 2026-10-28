@@ -1,10 +1,12 @@
 from django.urls import path
 
 from . import views
+from .aubar_views import chat
 
 app_name = 'portfolio'
 
 urlpatterns = [
+    path('chat/', chat, name='aubar-chat'),
     path('perfil/', views.perfil_publico, name='perfil-publico'),
     path('tecnologias/', views.tecnologias_publicas, name='tecnologias-publicas'),
     path(

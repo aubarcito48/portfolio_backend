@@ -3,6 +3,13 @@
 Backend del portfolio con Django. El proyecto Django se llama `config` y la
 aplicación inicial es `portfolio`.
 
+## Aubar · Asistente con IA
+
+El portfolio incluye un chat en español e inglés. Django obtiene únicamente
+información publicada mediante MCP y genera respuestas con Groq.
+Configuración de `.env`, contrato, límites, pruebas y pasos para Render:
+[guía de Aubar](docs/AUBAR.md).
+
 El contenido público admite español e inglés con `?lang=es` / `?lang=en`.
 Ver [idiomas, mantenimiento de traducciones y orden de publicación](docs/I18N.md).
 
