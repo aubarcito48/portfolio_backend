@@ -1,0 +1,18 @@
+[
+  {
+    "target": "local",
+    "schema": "public",
+    "experienceId": 3,
+    "changed": true,
+    "otherFieldsAndRowsUnchanged": true,
+    "backup": "backups\\empleo-reference-20261029T140504Z-local.json"
+  },
+  {
+    "target": "supabase",
+    "schema": "public",
+    "experienceId": 3,
+    "changed": true,
+    "otherFieldsAndRowsUnchanged": true,
+    "backup": "backups\\empleo-reference-20261029T140506Z-supabase.json"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "target": "local",
+    "schema": "public",
+    "experienceId": 1,
+    "verified": true,
+    "otherFieldsAndRowsUnchanged": true,
+    "backup": "backups\\dges-ispc-20261029T141450Z-local.json"
+  },
+  {
+    "target": "supabase",
+    "schema": "public",
+    "experienceId": 1,
+    "verified": true,
+    "otherFieldsAndRowsUnchanged": true,
+    "backup": "backups\\dges-ispc-20261029T141452Z-supabase.json"
+  }
+]

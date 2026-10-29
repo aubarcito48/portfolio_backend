@@ -45,15 +45,20 @@ ORIGINAL_EXPERIENCE = (
 
 SPANISH_TEXT = (
     ('Pasante de desarrollo web',
+     'Realicé una pasantía laboral a través del ISPC (Instituto Superior Politécnico de Córdoba) '
+     'en la DGES (Dirección General de Educación Superior).\n'
      'Trabajé con WordPress en un entorno profesional.\n'
-     'Adquirí experiencia práctica en el desarrollo y mantenimiento de sitios web.'),
+     'Adquirí experiencia práctica en el desarrollo y mantenimiento de sitios web.\n'
+     'Referencia laboral: Gabriel Cámara — virtualdges@gmail.com'),
     ('Desarrollador full stack independiente',
      'Desarrollo aplicaciones web y funcionalidades de frontend y backend.\n'
      'Integro APIs y trabajo con bases de datos.\n'
      'Utilizo herramientas de control de versiones y desarrollo colaborativo.'),
     ('Soporte técnico informático',
+     'Participé a través del programa Empleo +26.\n'
      'Brindé soporte técnico en un entorno organizacional.\n'
-     'Colaboré en el diagnóstico y la resolución de problemas informáticos.'),
+     'Colaboré en el diagnóstico y la resolución de problemas informáticos.\n'
+     'Referencia laboral: Mariela Selim — administracion@sanatoriofrances.com.ar'),
 )
 APPROVED_EXPERIENCE = tuple(
     {**original, 'title': title, 'description': description}

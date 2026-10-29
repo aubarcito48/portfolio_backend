@@ -1,5 +1,18 @@
 # Experiencia laboral aprobada
 
+Actualización del 29/10/2026: el responsable aclaró que la experiencia en DGES
+(Dirección General de Educación Superior) fue una pasantía laboral a través del
+ISPC (Instituto Superior Politécnico de Córdoba). Se agregó esta información a
+la descripción, conservando las tareas y la referencia laboral de Gabriel Cámara.
+
+Actualización del 29/10/2026: el responsable solicitó agregar a Gabriel Cámara,
+virtualdges@gmail.com, como referencia laboral de la experiencia en DGES.
+
+Actualización del 29/10/2026: el responsable indicó que la experiencia del
+Sanatorio Francés se realizó a través del programa Empleo +26 y solicitó agregar
+como referencia laboral a Mariela Selim, administracion@sanatoriofrances.com.ar.
+Se incorporaron ambos datos a la descripción aprobada y al catálogo en inglés.
+
 Fecha: 19/10/2026. El responsable solicitó cargar la experiencia del frontend y
 proporcionó los cargos, organizaciones, tareas y períodos. También confirmó enero
 como mes de inicio de la actividad freelance en 2023. La primera carga conservó

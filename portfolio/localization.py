@@ -5,6 +5,10 @@ original value; URLs, slugs, dates, identifiers and publication are never transl
 """
 
 ENGLISH = {
+    'Realicé una pasantía laboral a través del ISPC (Instituto Superior Politécnico de Córdoba) en la DGES (Dirección General de Educación Superior).':
+        'Completed a work internship through ISPC (Instituto Superior Politécnico de Córdoba) at DGES (Dirección General de Educación Superior).',
+    'Referencia laboral: Gabriel Cámara — virtualdges@gmail.com':
+        'Work reference: Gabriel Cámara — virtualdges@gmail.com',
     'Asistente de escritorio con ESP32, avatar animado, control por voz e inteligencia artificial.':
         'Desktop assistant with ESP32, an animated avatar, voice control and artificial intelligence.',
     'Asistente de escritorio con un avatar animado en una pantalla Waveshare ESP32-S3. Combina firmware en C++ y un panel de control en Python para manejar 28 expresiones y 23 animaciones por voz. Integra conversaciones con Groq, respuestas habladas con Dora y comandos para buscar y reproducir videos de YouTube desde la PC.':
@@ -33,6 +37,10 @@ ENGLISH = {
     'Utilizo herramientas de control de versiones y desarrollo colaborativo.':
         'Use version control and collaborative development tools.',
     'Soporte técnico informático': 'IT Technical Support',
+    'Participé a través del programa Empleo +26.':
+        'Participated through the Empleo +26 program.',
+    'Referencia laboral: Mariela Selim — administracion@sanatoriofrances.com.ar':
+        'Work reference: Mariela Selim — administracion@sanatoriofrances.com.ar',
     'Brindé soporte técnico en un entorno organizacional.':
         'Provided technical support in an organizational environment.',
     'Colaboré en el diagnóstico y la resolución de problemas informáticos.':
