@@ -1,0 +1,16 @@
+[
+  {
+    "target": "local",
+    "schema": "public",
+    "cvUrlsVerified": true,
+    "otherFieldsAndLinksUnchanged": true,
+    "backup": "backups\\cv-urls-20261029T144125Z-local.json"
+  },
+  {
+    "target": "supabase",
+    "schema": "public",
+    "cvUrlsVerified": true,
+    "otherFieldsAndLinksUnchanged": true,
+    "backup": "backups\\cv-urls-20261029T144127Z-supabase.json"
+  }
+]

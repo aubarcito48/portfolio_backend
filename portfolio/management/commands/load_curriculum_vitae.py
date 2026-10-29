@@ -12,12 +12,12 @@ from portfolio.models import Enlace
 CV = {
     'label': 'Curriculum Vitae',
     'type': 'cv',
-    'url': 'https://drive.google.com/file/d/1Y24Qqs4Be3twPaFE7_Y1Fkk89YGlbLYe/view?usp=sharing',
+    'url': 'https://drive.google.com/file/d/1Oy3AnWPr2F6JOtoWTRjgQh4jsKfWaBNm/view?usp=sharing',
 }
 CV_EN = {
     'label': 'Curriculum Vitae (English)',
     'type': 'cv_en',
-    'url': 'https://drive.google.com/file/d/1sA7CrGlnX3rSwsffLnBrR9BJzgM-JNUK/view?usp=sharing',
+    'url': 'https://drive.google.com/file/d/1KtHtqDxkDJo-1u0IvB1__EvKIzHVTvMY/view?usp=sharing',
 }
 
 

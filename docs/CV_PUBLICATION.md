@@ -1,5 +1,9 @@
 # Curriculum Vitae · Enlace dinámico
 
+Actualización del 29 de octubre de 2026: el propietario proporcionó nuevas URLs
+para ambas versiones del CV. Se actualizaron los registros existentes en local y
+Supabase `public`, conservando sus identificadores, etiquetas, orden y publicación.
+
 ## Versiones en español e inglés
 
 La presentación y Contacto agrupan los enlaces como
@@ -7,9 +11,10 @@ La presentación y Contacto agrupan los enlaces como
 Drive en una pestaña nueva. Al cambiar el idioma se traducen las etiquetas,
 pero ambas versiones permanecen disponibles.
 
-- Español: tipo `cv`, URL original indicada abajo.
+- Español: tipo `cv`, URL
+  `https://drive.google.com/file/d/1Oy3AnWPr2F6JOtoWTRjgQh4jsKfWaBNm/view?usp=sharing`.
 - Inglés: tipo `cv_en`, etiqueta de administración `Curriculum Vitae (English)`,
-  URL `https://drive.google.com/file/d/1sA7CrGlnX3rSwsffLnBrR9BJzgM-JNUK/view?usp=sharing`.
+  URL `https://drive.google.com/file/d/1KtHtqDxkDJo-1u0IvB1__EvKIzHVTvMY/view?usp=sharing`.
 
 Ambos registros están publicados en PostgreSQL local y Supabase `public`.
 El esquema privado permanece sin cambios. Para actualizar cualquiera de
