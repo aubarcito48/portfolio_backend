@@ -10,10 +10,9 @@ PROJECT = {
     'slug': 'aubar-bot',
     'summary': 'Asistente de escritorio con ESP32, avatar animado, control por voz e inteligencia artificial.',
     'description': (
-        'Asistente de escritorio con un avatar animado en una pantalla Waveshare ESP32-S3. '
-        'Combina firmware en C++ y un panel de control en Python para manejar 28 expresiones '
-        'y 23 animaciones por voz. Integra conversaciones con Groq, respuestas habladas con '
-        'Dora y comandos para buscar y reproducir videos de YouTube desde la PC.'
+        'Asistente de escritorio con ESP32-S3, avatar animado y control por voz. '
+        'Desarrollado en C++ y Python, integra conversaciones con IA mediante Groq, '
+        'respuestas habladas con Dora y reproducción de videos de YouTube.'
     ),
     'project_type': 'Proyecto personal · Hardware e IA',
     'image_url': 'https://raw.githubusercontent.com/aubarcito48/aubar-bot/e8454ea277a1cf00a5168490accfc7d2c6310462/docs/images/kirby-ojos-semicerrados-ilustracion.png',

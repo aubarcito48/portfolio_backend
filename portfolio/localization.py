@@ -5,6 +5,8 @@ original value; URLs, slugs, dates, identifiers and publication are never transl
 """
 
 ENGLISH = {
+    'Asistente de escritorio con ESP32-S3, avatar animado y control por voz. Desarrollado en C++ y Python, integra conversaciones con IA mediante Groq, respuestas habladas con Dora y reproducción de videos de YouTube.':
+        'Desktop assistant with ESP32-S3, an animated avatar, and voice control. Built with C++ and Python, it integrates AI conversations through Groq, spoken responses with Dora, and YouTube video playback.',
     'Me gusta crear aplicaciones web y encontrar soluciones a problemas técnicos. En mis proyectos combino frontend y backend, integro APIs e inteligencia artificial, desarrollo chatbots para WhatsApp con la API de Meta y conecto formularios con servicios de correo. También exploro soluciones IoT con ESP32 y cuento con experiencia en WordPress y soporte técnico informático.':
         'I enjoy building web applications and finding solutions to technical problems. In my projects, I combine frontend and backend development, integrate APIs and artificial intelligence, build WhatsApp chatbots with the Meta API, and connect forms to email services. I also explore IoT solutions with ESP32 and have experience with WordPress and IT technical support.',
     'Hoy busco seguir creciendo como desarrollador, mejorar la calidad de lo que construyo con pruebas automatizadas y aportar a proyectos reales.':
