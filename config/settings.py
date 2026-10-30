@@ -128,12 +128,16 @@ WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET', '').strip()
 WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN', '').strip()
 WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '').strip()
 WHATSAPP_GRAPH_VERSION = os.getenv('WHATSAPP_GRAPH_VERSION', '').strip()
+WHATSAPP_TEST_RECIPIENT = os.getenv('WHATSAPP_TEST_RECIPIENT', '').strip()
 if WHATSAPP_ENABLED:
     import re
     if (not all((WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET, WHATSAPP_ACCESS_TOKEN))
             or not re.fullmatch(r'[0-9]+', WHATSAPP_PHONE_NUMBER_ID)
             or not re.fullmatch(r'v[0-9]+\.0', WHATSAPP_GRAPH_VERSION)):
         raise ImproperlyConfigured('Completá las variables WHATSAPP_* antes de activar el bot.')
+    if WHATSAPP_TEST_RECIPIENT and not re.fullmatch(r'54[0-9]{10}', WHATSAPP_TEST_RECIPIENT):
+        raise ImproperlyConfigured(
+            'WHATSAPP_TEST_RECIPIENT debe ser el destinatario argentino autorizado: 54 y 10 dígitos, sin + ni 9 móvil.')
 
 CSRF_TRUSTED_ORIGINS = parse_trusted_origins(
     'DJANGO_CSRF_TRUSTED_ORIGINS',

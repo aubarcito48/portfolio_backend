@@ -17,7 +17,8 @@ from config.safe_logging import SafeJsonFormatter
 
 CONFIG = dict(WHATSAPP_ENABLED=True, WHATSAPP_VERIFY_TOKEN='synthetic-verify',
               WHATSAPP_APP_SECRET='synthetic-secret', WHATSAPP_ACCESS_TOKEN='synthetic-access',
-              WHATSAPP_PHONE_NUMBER_ID='12345', WHATSAPP_GRAPH_VERSION='v99.0')
+              WHATSAPP_PHONE_NUMBER_ID='12345', WHATSAPP_GRAPH_VERSION='v99.0',
+              WHATSAPP_TEST_RECIPIENT='')
 
 
 def message(text=None, phone='15555550101', identifier='test-message'):
@@ -170,6 +171,22 @@ class ConversationTests(SimpleTestCase):
             slots.release.assert_called_once()
             log.error.assert_called_once_with('whatsapp_processing_failed',
                 extra={'failure_type': 'UnexpectedError'})
+
+    @patch.object(wa, 'urlopen')
+    def test_argentine_test_recipient_override_is_explicit_and_exact(self, http):
+        http.return_value.__enter__.return_value.status = 200
+        def destination(phone):
+            wa.send_text(phone, 'Hello')
+            return json.loads(http.call_args.args[0].data)['to']
+        # No override by default, including for Argentine numbers.
+        self.assertEqual(destination('5491112345678'), '5491112345678')
+        with override_settings(WHATSAPP_TEST_RECIPIENT='541112345678'):
+            self.assertEqual(destination('5491112345678'), '541112345678')
+            self.assertEqual(destination('541112345678'), '541112345678')
+            self.assertEqual(destination('5491112345679'), '5491112345679')
+            self.assertEqual(destination('15555550101'), '15555550101')
+        # Removing the test option restores unchanged outbound addressing.
+        self.assertEqual(destination('5491112345678'), '5491112345678')
 
     @patch.object(wa, 'urlopen')
     def test_meta_rejection_exposes_only_allowlisted_numeric_diagnostics(self, http):

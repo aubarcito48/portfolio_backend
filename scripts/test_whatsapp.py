@@ -8,7 +8,8 @@ os.environ.update(PYTHON_DOTENV_DISABLED='1', DJANGO_SETTINGS_MODULE='config.set
     DJANGO_ENVIRONMENT='test', DJANGO_DEBUG='False',
     DJANGO_SECRET_KEY='synthetic-whatsapp-tests-only', DJANGO_ALLOWED_HOSTS='testserver,localhost',
     POSTGRES_DB='synthetic_whatsapp', POSTGRES_USER='synthetic', POSTGRES_PASSWORD='synthetic',
-    POSTGRES_TEST_DB='synthetic_whatsapp_test', GROQ_API_KEY='', WHATSAPP_ENABLED='False')
+    POSTGRES_TEST_DB='synthetic_whatsapp_test', GROQ_API_KEY='', WHATSAPP_ENABLED='False',
+    WHATSAPP_TEST_RECIPIENT='')
 from django.conf import settings
 settings.DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}}
 import django

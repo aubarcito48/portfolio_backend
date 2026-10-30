@@ -59,6 +59,7 @@ En el servicio existente **portfolio-backend → Environment**, agregar:
 | `WHATSAPP_ACCESS_TOKEN` | Access Token de Meta con permiso para enviar mensajes desde la cuenta/número elegidos. El temporal sirve para pruebas y vence; para producción configurar el token apropiado del usuario del sistema y sus permisos. |
 | `WHATSAPP_PHONE_NUMBER_ID` | Phone Number ID de API Setup. Solo dígitos; no usar el teléfono ni el WhatsApp Business Account ID. |
 | `WHATSAPP_GRAPH_VERSION` | Versión soportada mostrada en el ejemplo de API Setup, con formato `vNN.0`. Copiar el valor real; no usar literalmente `vNN.0`. |
+| `WHATSAPP_TEST_RECIPIENT` | Opcional, solo para el problema de formato argentino en pruebas descrito abajo. Vacío por defecto y en producción. |
 | `GROQ_API_KEY` | Clave de Groq que ya usa Aubar; conservarla. |
 | `GROQ_MODEL` | Modelo configurado para Aubar; conservarlo. |
 
@@ -125,6 +126,23 @@ registrar el verify token que Meta envía al verificar el webhook. No sobrescrib
 ese formato desde el Start Command ni desde `GUNICORN_CMD_ARGS`.
 
 ## Límites de esta primera versión
+
+### Error 131030 con un destinatario argentino ya autorizado
+
+Si Meta permite enviar el mensaje de prueba al número autorizado con formato
+`54` + 10 dígitos, pero rechaza la respuesta automática con `metaCode=131030`,
+puede haber una diferencia con el remitente entrante `549` + 10 dígitos.
+En ese caso configurar `WHATSAPP_TEST_RECIPIENT` con el destinatario exacto
+de la lista autorizada de **API Setup → A**, sin signos ni espacios, por ejemplo
+`541112345678` (ilustrativo). No usar el número emisor de prueba de Meta.
+
+Esta opción convierte exclusivamente la variante `549` de ese mismo destinatario
+al formato `54` configurado, solo para el envío. Conserva el remitente original
+para la sesión y no cambia otros destinatarios. No agrega números a la lista de Meta,
+no evita su verificación ni resuelve problemas de permisos o tokens.
+Retirar la variable cuando se termine la prueba y se pase a producción.
+
+### Capacidad y persistencia
 
 - El webhook responde rápido y una cola en segundo plano genera/envía las respuestas.
   Cola de hasta 20 lotes, hasta 100 mensajes por lote, un consumidor.

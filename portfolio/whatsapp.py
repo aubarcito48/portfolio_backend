@@ -72,6 +72,12 @@ class WhatsAppSendError(Exception):
 
 def send_text(recipient, text):
     """Fixed Graph host; credentials and provider error bodies never reach logs."""
+    # Opt-in workaround for Meta test allowlists in Argentina. Rewrite only the
+    # exact configured recipient's 549 variant; never normalize unrelated numbers.
+    test_recipient = settings.WHATSAPP_TEST_RECIPIENT
+    if (re.fullmatch(r'54[0-9]{10}', test_recipient)
+            and recipient == '549' + test_recipient[2:]):
+        recipient = test_recipient
     request = Request(
         f'https://graph.facebook.com/{settings.WHATSAPP_GRAPH_VERSION}/'
         f'{settings.WHATSAPP_PHONE_NUMBER_ID}/messages',
