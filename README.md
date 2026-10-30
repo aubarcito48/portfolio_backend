@@ -1,5 +1,8 @@
 # Portfolio backend
 
+Formulario de contacto con envío al correo del portfolio:
+[configuración de Resend/Render y verificación](docs/CONTACT.md).
+
 Bot de WhatsApp con activación por el mensaje del portfolio:
 [integración Meta Cloud API, variables de Render y pruebas](docs/WHATSAPP.md).
 
@@ -75,10 +78,10 @@ En producción se reconoce `X-Forwarded-Proto` del proxy de Render y las cookies
 de sesión y CSRF se marcan `Secure`; estas opciones no se activan en desarrollo
 ni en tests. La confianza en esa cabecera requiere mantener el proxy confiable.
 
-El proyecto no tiene envío de correo, recuperación de contraseña por email ni
-formularios de contacto que envíen mensajes. En producción `MAILERS` usa el
-backend `dummy`: descarta mensajes sin red ni salida a consola. No se configura
-SMTP ni un proveedor. Django considera ese backend no apto para envío real y
+El formulario de contacto envía por HTTPS con Resend (ver `docs/CONTACT.md`).
+La recuperación de contraseña por email sigue deshabilitada. En producción `MAILERS` usa el
+backend `dummy`: descarta mensajes del Admin sin red ni salida a consola. No se configura
+SMTP para ese mailer. Django considera ese backend no apto para envío real y
 emite `mail.E001`; se exceptúa **solo ese chequeo, solo en producción**, porque
 el envío está deshabilitado intencionalmente. El resto de los chequeos sigue
 activo. Desarrollo conserva el backend de consola. Si se incorpora email en

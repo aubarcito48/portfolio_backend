@@ -121,6 +121,10 @@ CORS_ALLOW_METHODS = ('GET', 'HEAD', 'OPTIONS', 'POST')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-20b').strip()
 
+# Contact email uses HTTPS, independently of Django's disabled Admin mailers.
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
+CONTACT_FROM_EMAIL = os.getenv('CONTACT_FROM_EMAIL', 'onboarding@resend.dev').strip()
+
 # Optional Meta Cloud API integration. Disabled until explicitly configured.
 WHATSAPP_ENABLED = os.getenv('WHATSAPP_ENABLED', 'False').strip().lower() == 'true'
 WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN', '').strip()
@@ -308,8 +312,8 @@ MAILERS = {
 }
 
 if ENVIRONMENT == 'production':
-    # This read-only API/Admin has no email workflows. Explicitly disable mail
-    # rather than configure unused SMTP or print private mail to production logs.
+    # Admin mail is disabled; the contact endpoint uses Resend HTTPS separately.
+    # Do not configure unused SMTP or print private mail to production logs.
     # Django flags dummy mail as non-production: exempt only that intentional
     # choice; all unrelated deployment/security checks stay enabled.
     SILENCED_SYSTEM_CHECKS = ['mail.E001']

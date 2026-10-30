@@ -3,10 +3,12 @@ from django.urls import path
 from . import views
 from .aubar_views import chat
 from .whatsapp import webhook
+from .contact import contact
 
 app_name = 'portfolio'
 
 urlpatterns = [
+    path('contacto/', contact, name='contact'),
     path('whatsapp/webhook/', webhook, name='whatsapp-webhook'),
     path('chat/', chat, name='aubar-chat'),
     path('perfil/', views.perfil_publico, name='perfil-publico'),

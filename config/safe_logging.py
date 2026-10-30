@@ -32,6 +32,8 @@ class SafeJsonFormatter(logging.Formatter):
     def format(self, record):
         if record.name == 'portfolio.health':
             component, event = 'health', 'database_unavailable'
+        elif record.name == 'portfolio.contact':
+            component, event = 'contact', 'delivery_failed'
         elif record.name == 'portfolio.whatsapp':
             component = 'whatsapp'
             event = ('delivery_failed' if record.msg == 'whatsapp_delivery_failed'
