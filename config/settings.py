@@ -121,6 +121,20 @@ CORS_ALLOW_METHODS = ('GET', 'HEAD', 'OPTIONS', 'POST')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-20b').strip()
 
+# Optional Meta Cloud API integration. Disabled until explicitly configured.
+WHATSAPP_ENABLED = os.getenv('WHATSAPP_ENABLED', 'False').strip().lower() == 'true'
+WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN', '').strip()
+WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET', '').strip()
+WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN', '').strip()
+WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '').strip()
+WHATSAPP_GRAPH_VERSION = os.getenv('WHATSAPP_GRAPH_VERSION', '').strip()
+if WHATSAPP_ENABLED:
+    import re
+    if (not all((WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET, WHATSAPP_ACCESS_TOKEN))
+            or not re.fullmatch(r'[0-9]+', WHATSAPP_PHONE_NUMBER_ID)
+            or not re.fullmatch(r'v[0-9]+\.0', WHATSAPP_GRAPH_VERSION)):
+        raise ImproperlyConfigured('Completá las variables WHATSAPP_* antes de activar el bot.')
+
 CSRF_TRUSTED_ORIGINS = parse_trusted_origins(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
 )

@@ -1,5 +1,8 @@
 # Portfolio backend
 
+Bot de WhatsApp con activación por el mensaje del portfolio:
+[integración Meta Cloud API, variables de Render y pruebas](docs/WHATSAPP.md).
+
 Backend del portfolio con Django. El proyecto Django se llama `config` y la
 aplicación inicial es `portfolio`.
 
