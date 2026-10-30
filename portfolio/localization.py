@@ -89,7 +89,7 @@ SPANISH = {
 }
 
 TEXT_FIELDS = frozenset({
-    'name', 'specialty', 'biography', 'location', 'title', 'description',
+    'name', 'specialty', 'introduction', 'biography', 'location', 'title', 'description',
     'summary', 'type', 'imageAlt', 'label', 'detail',
 })
 

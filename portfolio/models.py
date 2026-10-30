@@ -25,6 +25,7 @@ class Perfil(models.Model):
     )
     name = models.CharField(max_length=150)
     professional_title = models.CharField(max_length=200)
+    introduction = models.TextField(blank=True, default='')
     biography = models.TextField()
     location = models.CharField(max_length=150)
     image_url = models.CharField(
@@ -59,6 +60,7 @@ class Perfil(models.Model):
         return {
             'name': self.name,
             'specialty': self.professional_title,
+            'introduction': self.introduction,
             'biography': self.biography,
             'location': self.location,
             'photo': self.image_url,

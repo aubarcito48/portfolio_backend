@@ -140,6 +140,19 @@ class ProviderTests(SimpleTestCase):
 
 
 class McpPublishedOnlyTests(TestCase):
+    def test_home_introduction_and_biography_are_independent_public_content(self):
+        profile = Perfil.objects.get()
+        profile.introduction = 'Presentación breve para Inicio.'
+        profile.biography = 'Texto diferente para Sobre mí.'
+        profile.save()
+        data = self.client.get('/api/v1/perfil/').json()
+        self.assertEqual(data['introduction'], profile.introduction)
+        self.assertEqual(data['biography'], profile.biography)
+        self.assertEqual(read_public_section('perfil', 'es'), data)
+        profile.biography = 'Una edición de Sobre mí.'
+        profile.save()
+        self.assertEqual(self.client.get('/api/v1/perfil/').json()['introduction'], data['introduction'])
+
     def test_profile_contact_updates_reach_public_api_and_mcp(self):
         profile = Perfil.objects.get()
         profile.biography = 'Perfil actualizado.\n\nTeléfono: 3517587047\n\nCorreo: nahuel.cba.48@gmail.com'

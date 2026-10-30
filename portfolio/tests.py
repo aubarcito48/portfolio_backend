@@ -132,7 +132,7 @@ class PerfilApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             set(response.json()),
-            {'name', 'specialty', 'biography', 'location', 'photo'},
+            {'name', 'specialty', 'introduction', 'biography', 'location', 'photo'},
         )
         self.assertEqual(response.json()['name'], 'Nahuel Argandoña')
         self.assertEqual(
