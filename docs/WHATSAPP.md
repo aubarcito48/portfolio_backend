@@ -113,8 +113,16 @@ Meta para la aplicación, la cuenta y el número real, y verificar el token de p
 Si no funciona: revisar firma/App Secret, vencimiento del Access Token, Phone Number
 ID, permisos y suscripción a `messages`. El token de verificación solo resuelve el GET;
 no autoriza el envío. Los logs no imprimen tokens, teléfonos ni conversaciones.
-Un error `whatsapp_processing_failed` exige revisar la configuración en Meta/Render;
-no publicar cuerpos de errores del proveedor para depurarlo.
+Los errores nuevos distinguen `component=whatsapp`, `event=delivery_failed`
+(rechazo de Meta, con `statusCode`, `metaCode` y `metaSubcode` numéricos si existen)
+de `event=processing_failed` (fallo interno o de transporte con tipo acotado).
+Los registros antiguos `backend_error` no permiten conocer esa causa: repetir
+una prueba después de desplegar el diagnóstico nuevo. No publicar cuerpos de errores
+del proveedor para depurarlo.
+
+`gunicorn.conf.py` configura logs de acceso con la ruta sin query string para no
+registrar el verify token que Meta envía al verificar el webhook. No sobrescribir
+ese formato desde el Start Command ni desde `GUNICORN_CMD_ARGS`.
 
 ## Límites de esta primera versión
 

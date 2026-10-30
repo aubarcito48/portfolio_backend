@@ -1,14 +1,18 @@
 """No calls to Meta/Groq, no real phone numbers or production databases."""
 import hashlib
 import hmac
+import io
 import json
+import logging
 import time
+from urllib.error import HTTPError
 from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase, override_settings
 
 from . import whatsapp as wa
 from .aubar_service import AubarUnavailable
+from config.safe_logging import SafeJsonFormatter
 
 
 CONFIG = dict(WHATSAPP_ENABLED=True, WHATSAPP_VERIFY_TOKEN='synthetic-verify',
@@ -164,4 +168,29 @@ class ConversationTests(SimpleTestCase):
         with patch.object(wa, '_slots') as slots, patch.object(wa, 'logger') as log:
             wa._run_batch([message()])
             slots.release.assert_called_once()
-            log.error.assert_called_once_with('whatsapp_processing_failed')
+            log.error.assert_called_once_with('whatsapp_processing_failed',
+                extra={'failure_type': 'UnexpectedError'})
+
+    @patch.object(wa, 'urlopen')
+    def test_meta_rejection_exposes_only_allowlisted_numeric_diagnostics(self, http):
+        raw = {'error': {'code': 190, 'error_subcode': 463, 'message': 'private-token-and-phone'}}
+        http.side_effect = HTTPError('https://graph.facebook.com', 401, 'private', {},
+                                     io.BytesIO(json.dumps(raw).encode()))
+        with self.assertRaises(wa.WhatsAppSendError) as caught:
+            wa.send_text('15555550101', 'Hello')
+        error = caught.exception
+        self.assertEqual((error.status, error.code, error.subcode), (401, 190, 463))
+        with patch.object(wa, 'process_message', side_effect=error), self.assertLogs('portfolio.whatsapp') as logs:
+            wa._slots.acquire()
+            wa._run_batch([message()])
+        formatted = SafeJsonFormatter().format(logs.records[0])
+        result = json.loads(formatted)
+        self.assertEqual(result['event'], 'delivery_failed')
+        self.assertEqual(result['metaCode'], 190)
+        self.assertEqual(result['metaSubcode'], 463)
+        self.assertEqual(result['statusCode'], 401)
+        self.assertNotIn('private', formatted)
+        record = logging.LogRecord('portfolio.whatsapp', logging.ERROR, '', 0,
+                                   'whatsapp_delivery_failed', (), None)
+        record.meta_code = 'secret-value'
+        self.assertNotIn('secret-value', SafeJsonFormatter().format(record))

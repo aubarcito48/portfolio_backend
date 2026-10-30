@@ -13,6 +13,7 @@ import logging
 import re
 import threading
 import time
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from django.conf import settings
@@ -23,6 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .aubar_service import AubarUnavailable, answer
 from .aubar_views import valid_text
+from config.safe_logging import safe_error_type
 
 
 TRIGGERS = {
@@ -60,6 +62,14 @@ class Session:
     requests: deque = field(default_factory=deque)
 
 
+class WhatsAppSendError(Exception):
+    def __init__(self, status, code=None, subcode=None):
+        self.status = status
+        self.code = code
+        self.subcode = subcode
+        super().__init__('WhatsApp delivery rejected')
+
+
 def send_text(recipient, text):
     """Fixed Graph host; credentials and provider error bodies never reach logs."""
     request = Request(
@@ -69,9 +79,23 @@ def send_text(recipient, text):
                          'type': 'text', 'text': {'body': text, 'preview_url': False}}).encode(),
         headers={'Authorization': 'Bearer ' + settings.WHATSAPP_ACCESS_TOKEN,
                  'Content-Type': 'application/json'}, method='POST')
-    with urlopen(request, timeout=10) as response:
-        if response.status != 200:
-            raise OSError('WhatsApp send failed')
+    try:
+        with urlopen(request, timeout=10) as response:
+            if response.status != 200:
+                raise WhatsAppSendError(response.status)
+    except HTTPError as error:
+        # Only numeric diagnostics survive. Never retain the provider message/body.
+        code = subcode = None
+        try:
+            with error:
+                raw = error.read(16385)
+            if len(raw) <= 16384:
+                details = json.loads(raw).get('error', {})
+                code = details.get('code')
+                subcode = details.get('error_subcode')
+        except (ValueError, TypeError, AttributeError, OSError):
+            pass
+        raise WhatsAppSendError(error.code, code, subcode) from None
 
 
 def _prune(now):
@@ -143,9 +167,14 @@ def _run_batch(messages):
                 continue
             try:
                 process_message(message)
-            except Exception:
+            except WhatsAppSendError as error:
+                logger.error('whatsapp_delivery_failed', extra={
+                    'status_code': error.status, 'meta_code': error.code,
+                    'meta_subcode': error.subcode})
+            except Exception as error:
                 # Do not log message contents, phone numbers, tokens or exceptions.
-                logger.error('whatsapp_processing_failed')
+                logger.error('whatsapp_processing_failed', extra={
+                    'failure_type': safe_error_type(error)})
     finally:
         close_old_connections()
         _slots.release()

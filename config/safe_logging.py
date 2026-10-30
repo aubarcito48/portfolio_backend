@@ -32,6 +32,10 @@ class SafeJsonFormatter(logging.Formatter):
     def format(self, record):
         if record.name == 'portfolio.health':
             component, event = 'health', 'database_unavailable'
+        elif record.name == 'portfolio.whatsapp':
+            component = 'whatsapp'
+            event = ('delivery_failed' if record.msg == 'whatsapp_delivery_failed'
+                     else 'processing_failed')
         elif record.name == 'django.server':
             component, event = 'http', 'http_response'
         elif record.name == 'django.request':
@@ -57,6 +61,11 @@ class SafeJsonFormatter(logging.Formatter):
         status = getattr(record, 'status_code', None)
         if type(status) is int and 100 <= status <= 599:
             payload['statusCode'] = status
+        if record.name == 'portfolio.whatsapp':
+            for attribute, key in (('meta_code', 'metaCode'), ('meta_subcode', 'metaSubcode')):
+                value = getattr(record, attribute, None)
+                if type(value) is int and 0 <= value <= 2147483647:
+                    payload[key] = value
         # Deliberately don't call getMessage()/formatException(): arbitrary
         # messages, args, extras and tracebacks may contain credentials or PII.
         return json.dumps(payload, ensure_ascii=True)
