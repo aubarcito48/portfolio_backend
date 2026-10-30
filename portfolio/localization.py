@@ -5,6 +5,14 @@ original value; URLs, slugs, dates, identifiers and publication are never transl
 """
 
 ENGLISH = {
+    'Me gusta crear aplicaciones web y encontrar soluciones a problemas técnicos. En mis proyectos combino frontend y backend, integro APIs e inteligencia artificial, desarrollo chatbots para WhatsApp con la API de Meta y conecto formularios con servicios de correo. También exploro soluciones IoT con ESP32 y cuento con experiencia en WordPress y soporte técnico informático.':
+        'I enjoy building web applications and finding solutions to technical problems. In my projects, I combine frontend and backend development, integrate APIs and artificial intelligence, build WhatsApp chatbots with the Meta API, and connect forms to email services. I also explore IoT solutions with ESP32 and have experience with WordPress and IT technical support.',
+    'Hoy busco seguir creciendo como desarrollador, mejorar la calidad de lo que construyo con pruebas automatizadas y aportar a proyectos reales.':
+        'I am looking to keep growing as a developer, improve the quality of what I build through automated testing, and contribute to real projects.',
+    'Me interesa construir aplicaciones web, resolver problemas técnicos y conectar servicios mediante APIs e inteligencia artificial. Desarrollo chatbots inteligentes, integro WhatsApp con la API de Meta, implemento formularios de contacto con envío de correos y exploro soluciones IoT con ESP32. Mi recorrido incluye tecnologías frontend y backend, desarrollo con WordPress y soporte técnico informático.':
+        'I am interested in building web applications, solving technical problems, and connecting services through APIs and artificial intelligence. I develop intelligent chatbots, integrate WhatsApp with the Meta API, implement contact forms with email delivery, and explore IoT solutions with ESP32. My background includes frontend and backend technologies, WordPress development, and IT technical support.',
+    'Hoy estoy enfocado en seguir creciendo como desarrollador, profundizar en la calidad del software y las pruebas automatizadas, y contribuir a proyectos reales.':
+        'I am currently focused on growing as a developer, deepening my knowledge of software quality and automated testing, and contributing to real projects.',
     'Realicé una pasantía laboral a través del ISPC (Instituto Superior Politécnico de Córdoba) en la DGES (Dirección General de Educación Superior).':
         'Completed a work internship through ISPC (Instituto Superior Politécnico de Córdoba) at DGES (Dirección General de Educación Superior).',
     'Referencia laboral: Gabriel Cámara — virtualdges@gmail.com':
@@ -89,7 +97,13 @@ def translate_text(value, language):
     if value in catalog:
         return catalog[value]
     # Preserve paragraph and line breaks in biography and experience descriptions.
-    return '\n'.join(catalog.get(line, line) for line in value.split('\n'))
+    def translate_line(line):
+        if language == 'en':
+            for source, target in (('Teléfono: ', 'Phone: '), ('Correo: ', 'Email: ')):
+                if line.startswith(source):
+                    return target + line[len(source):]
+        return catalog.get(line, line)
+    return '\n'.join(translate_line(line) for line in value.split('\n'))
 
 
 def localize_payload(value, language):

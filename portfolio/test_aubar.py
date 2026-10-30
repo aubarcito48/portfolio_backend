@@ -140,6 +140,21 @@ class ProviderTests(SimpleTestCase):
 
 
 class McpPublishedOnlyTests(TestCase):
+    def test_profile_contact_updates_reach_public_api_and_mcp(self):
+        profile = Perfil.objects.get()
+        profile.biography = 'Perfil actualizado.\n\nTeléfono: 3517587047\n\nCorreo: nahuel.cba.48@gmail.com'
+        profile.save()
+        self.assertEqual(self.client.get('/api/v1/perfil/').json()['biography'], profile.biography)
+        self.assertEqual(read_public_section('perfil', 'es')['biography'], profile.biography)
+        english = read_public_section('perfil', 'en')['biography']
+        self.assertIn('Phone: 3517587047', english)
+        self.assertIn('Email: nahuel.cba.48@gmail.com', english)
+        profile.biography = 'Otro perfil.\n\nTeléfono: 1234567890\n\nCorreo: updated@example.com'
+        profile.save()
+        updated = read_public_section('perfil', 'es')['biography']
+        self.assertIn('1234567890', updated)
+        self.assertNotIn('3517587047', updated)
+
     def test_unpublished_profile_is_not_available(self):
         profile = Perfil.objects.get()
         profile.is_published = False
